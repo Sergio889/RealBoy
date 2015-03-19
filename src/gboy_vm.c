@@ -302,18 +302,18 @@ alloc_addr_sp()
 	switch (gb_cart.cart_ram_size) {
 		case 0:
 			if(gb_cart.cart_type == 0x5 || gb_cart.cart_type == 0x6 )
-				gb_cart.cart_ram_size = 1;
+				gb_cart.cart_ram_size = 512;
 			else
 				gb_cart.cart_ram_size = 0;
 			break;
 		case 1:
-			gb_cart.cart_ram_size = 2;
+			gb_cart.cart_ram_size = 2*1024;
 			break;
 		case 2:
-			gb_cart.cart_ram_size = 8;
+			gb_cart.cart_ram_size = 8*1024;
 			break;
 		case 3:
-			gb_cart.cart_ram_size = 32;
+			gb_cart.cart_ram_size = 32*1024;
 			break;
 		default:
 			;
@@ -372,17 +372,17 @@ alloc_addr_sp()
 		strncpy(save_name+i, "sav", 5);
 
  		/* Allocate space for RAM banks */
-		gb_cart.cart_ram_banks = malloc(1024*gb_cart.cart_ram_size);
+		gb_cart.cart_ram_banks = malloc(gb_cart.cart_ram_size);
 		/* Try to open RAM file */
 		if ( (gb_cart.cart_ram_fd=open_save_try(save_name)) == NULL)
 		{
 			/* There is no RAM file; create one */
 			gb_cart.cart_ram_fd = create_save(save_name);
-			fwrite(gb_cart.cart_ram_banks, 1, 1024*gb_cart.cart_ram_size, gb_cart.cart_ram_fd);
+			fwrite(gb_cart.cart_ram_banks, 1, gb_cart.cart_ram_size, gb_cart.cart_ram_fd);
 		}
 		/* There exists a RAM file, so read it to RAM space */
 		else
-			fread(gb_cart.cart_ram_banks, 1, 1024*gb_cart.cart_ram_size, gb_cart.cart_ram_fd);
+			fread(gb_cart.cart_ram_banks, 1, gb_cart.cart_ram_size, gb_cart.cart_ram_fd);
 		/* Initial RAM addresses */
 		addr_sp_ptrs[0xa]=addr_sp_ptrs[0xb]=(long)(gb_cart.cart_ram_banks-0xa000);
 

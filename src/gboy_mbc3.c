@@ -179,7 +179,7 @@ mbc3_ramtim_en(int val)
 	/* Sync RAM file */
 	if ((val&=0xf) != 0xa) {
 		rewind(gb_cart.cart_ram_fd);
-		fwrite(gb_cart.cart_ram_banks, 1, 1024*gb_cart.cart_ram_size, gb_cart.cart_ram_fd);
+		fwrite(gb_cart.cart_ram_banks, 1, gb_cart.cart_ram_size, gb_cart.cart_ram_fd);
 		if (gb_cart.cart_rtc_fd != NULL) {
 				rewind(gb_cart.cart_rtc_fd);
 				fwrite(&gb_mbc.mbc_rtc_last, 1, ((5*sizeof(long))+sizeof(time_t)), gb_cart.cart_rtc_fd);

@@ -69,6 +69,6 @@ mbc1_ram_en(int val)
 	/* Sync RAM file */
 	if (((val&=0xf) != 0xa) && (gb_cart.cart_ram_banks!=NULL)) {
 		rewind(gb_cart.cart_ram_fd);
-		fwrite(gb_cart.cart_ram_banks, 1, 1024*gb_cart.cart_ram_size, gb_cart.cart_ram_fd);
+		fwrite(gb_cart.cart_ram_banks, 1, gb_cart.cart_ram_size, gb_cart.cart_ram_fd);
 	}
 }
