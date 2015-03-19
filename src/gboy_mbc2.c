@@ -19,17 +19,18 @@
 void
 mbc2_rom_bank(int val)
 {
-
+	gb_cart.cart_curom_bank = val & 0xf; // update current ROM bank
+	mbc_rom_remap();
 }
 
 void
 mbc2_ram_en(int val)
 {
-
+		
 }
 
 void
 mbc2_ram_wr(int val)
 {
-
+	//Its not used... for now...
 }
