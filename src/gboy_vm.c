@@ -301,7 +301,10 @@ alloc_addr_sp()
 	/* Determine RAM size: gb_cart.cart_ram_size*1024 bytes */
 	switch (gb_cart.cart_ram_size) {
 		case 0:
-			gb_cart.cart_ram_size = 0;
+			if(gb_cart.cart_type == 0x5 || gb_cart.cart_type == 0x6 )
+				gb_cart.cart_ram_size = 1;
+			else
+				gb_cart.cart_ram_size = 0;
 			break;
 		case 1:
 			gb_cart.cart_ram_size = 2;
