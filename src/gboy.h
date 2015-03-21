@@ -160,7 +160,7 @@ struct gb_cart {
 	char cart_licensee[3];
 	Uint8 cart_type; // MBC used by cartridge
 	Uint8 cart_rom_size;
-	Uint8 cart_ram_size;
+	Uint16 cart_ram_size;
 	Uint8 cart_sgb; // cartridge supports SGB
 	Uint8 cart_cgb; // cartridge supports CGB
 	Uint32 cart_curom_bank;
