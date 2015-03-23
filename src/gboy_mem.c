@@ -25,9 +25,21 @@ mem_wr(Uint16 gb_addr, Uint8 val, Uint8 *host_addr)
 	if (gb_addr >= 0xff00 && gb_addr < 0xff80)
 		io_ctrl_wr(gb_addr&0xff, val);
 
-	else if (gb_addr <= 0x7fff)
-		(gb_mbc.mbc_funcs[(gb_addr>>12)])(val);
-					
+
+
+	else if (gb_addr <= 0x7fff){
+		// MBC2 read
+		if ((gb_cart.cart_type == 0x6 || gb_cart.cart_type == 0x5 ) && gb_addr >= 0x4000)
+			return;
+		else
+			(gb_mbc.mbc_funcs[(gb_addr>>12)])(val);
+
+	}
+
+	else if ((gb_cart.cart_type == 0x6 || gb_cart.cart_type == 0x5 ) && gb_addr >= 0xA000 && gb_addr <= 0xA1FF){
+		*host_addr = val&0xf;
+	}
+
 	else
 		*host_addr = val;
 }
@@ -38,7 +50,12 @@ mem_rd(Uint16 gb_addr, Uint8 *host_addr)
 	if (gb_addr < 0x8000)
 		return *host_addr;
 
-	if (gb_addr > 0xe000 && gb_addr < 0xfe00)
+	// not needed since we only read val&0xf
+//	else if ((gb_cart.cart_type == 0x6 || gb_cart.cart_type == 0x5 ) && gb_addr >= 0xA000 && gb_addr <= 0xA1FF){
+//		return (*host_addr)&0xf;
+//	}
+
+	else if (gb_addr > 0xe000 && gb_addr < 0xfe00)
 		gb_addr &= ~0x2000;
 
 //if (gb_addr < 0xc000) {
