@@ -88,3 +88,4 @@ static char *rom_sz_vec[] = { "Rom size 32kb", "Rom size 64kb", "Rom size 128kb"
 						"Rom size 256kb", "Rom size 512kb", "Rom size 1mb", 
 						"Rom size 2mb", "Rom size 4mb" };
 
+

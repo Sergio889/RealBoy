@@ -16,8 +16,13 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
  */
 
+
 #include "gboy.h"
 #include "main.h"
+#include "gboy_cpu.h"
+extern struct z80_set z80_ldex[];
+extern Uint32 instruction_counter[];
+
 
 static void
 usage(char *cmd)
@@ -145,6 +150,12 @@ main(int argc, char *argv[])
 	}
 	else
 		usage(argv[0]);
+
+	Uint16 opcode;
+	for (opcode  = 0; opcode < NUMBER_OF_INSTRUCTIONS; opcode++) {
+		printf("Opcode 0x%x, %s, %d\n", opcode, z80_ldex[opcode].name, instruction_counter[opcode]);
+	}
+
 
 	return 0;
 }

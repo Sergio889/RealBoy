@@ -31,6 +31,7 @@ extern void ignore_conf(long);
 extern void vid_toggle_fullscreen();
 extern void init_conf();
 
+
 /* Locally-global variables*/
 struct option options[] = {
 	{ "video-1x", no_argument, 0, '1' },

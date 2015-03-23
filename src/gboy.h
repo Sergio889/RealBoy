@@ -150,6 +150,13 @@
 #define CGB 1
 #define SGB 2
 
+/* Awesome Profiler */
+#define NUMBER_OF_INSTRUCTIONS 512
+
+
+
+//extern struct z80_set;
+
 /*
  * Structures used by RealBoy
  */
@@ -219,3 +226,5 @@ extern FILE *rom_file;
 extern long gb_clk_rate;
 extern Uint8 addr_sp[0x10000];
 extern long addr_sp_ptrs[16];
+
+Uint32 instruction_counter[NUMBER_OF_INSTRUCTIONS];

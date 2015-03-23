@@ -5719,6 +5719,10 @@ exec_next(int offset)
 
 	while (!chg_gam) {
 		rec = z80_ldex + *cpu_state.pc;
+
+		//Profiler instruction counter
+		(instruction_counter[(*cpu_state.pc)])++;
+
 		cpu_state.cur_tcks = rec->format[7];
 		if (gbddb==1)
 			gddb_main(0, cpu_state.pc, (Uint8 *)rec);
@@ -5751,5 +5755,9 @@ void
 rom_exec(int offset)
 {
 	memset(&cpu_state, 0, sizeof(struct cpu_state));
+
+	// Profiler opcodes counter super-array of awesomeness!!!
+	memset(&instruction_counter, 0, sizeof(instruction_counter));
+
 	exec_next(offset);
 }
