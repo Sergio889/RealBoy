@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
  */
 
+
 /* External symbols */
 extern Uint32 gboy_hw; // Game Boy/Color Game Boy hardware
 extern char *file_path;

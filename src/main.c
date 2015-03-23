@@ -19,9 +19,13 @@
 
 #include "gboy.h"
 #include "main.h"
+
+
+#ifdef PROFILER
 #include "gboy_cpu.h"
 extern struct z80_set z80_ldex[];
 extern Uint32 instruction_counter[];
+#endif
 
 
 static void
@@ -151,11 +155,13 @@ main(int argc, char *argv[])
 	else
 		usage(argv[0]);
 
+#ifdef PROFILER
+	printf("%s", "===================  Awesome profiler stats  ===================\n");
 	Uint16 opcode;
 	for (opcode  = 0; opcode < NUMBER_OF_INSTRUCTIONS; opcode++) {
-		printf("Opcode 0x%x, %s, %d\n", opcode, z80_ldex[opcode].name, instruction_counter[opcode]);
+		printf("Opcode 0x%x ? %s ? %d\n", opcode, z80_ldex[opcode].name, instruction_counter[opcode]);
 	}
-
+#endif
 
 	return 0;
 }
