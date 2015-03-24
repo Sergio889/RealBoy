@@ -16,17 +16,14 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA. 
  */
 
-
 #include "gboy.h"
 #include "main.h"
-
 
 #ifdef PROFILER
 #include "gboy_cpu.h"
 extern struct z80_set z80_ldex[];
 extern Uint32 instruction_counter[];
 #endif
-
 
 static void
 usage(char *cmd)

@@ -39,5 +39,12 @@ mbc2_ram_en(int val)
 void
 mbc2_ram_wr(int val)
 {
-	//Its not used... for now...
+
 }
+
+void
+mbc2_dummy(int val)
+{
+	return;
+}
+

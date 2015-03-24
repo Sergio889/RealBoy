@@ -40,10 +40,10 @@ mbc_rom_remap()
 /*
  * Main structure holding the various mbcX-specific functions.
  */
-static void (*mbc_def_funcs[4][5])(int) = { mbc1_ram_en, mbc1_rom_bank, mbc1_ram_bank, mbc1_mode, NULL,
-											mbc2_ram_en, mbc2_rom_bank, NULL, NULL, NULL,
-											mbc3_ramtim_en, mbc3_rom_bank, mbc3_ramrtc_bank, mbc3_clk, NULL,
-											mbc5_ram_en, mbc5_rom_bank_low, mbc5_rom_bank_high, mbc5_ram_bank, mbc5_dummy };
+static void (*mbc_def_funcs[4][6])(int) = { mbc1_ram_en, mbc1_rom_bank, mbc1_ram_bank, mbc1_mode, NULL, NULL,
+											mbc2_ram_en, mbc2_rom_bank, mbc2_dummy, mbc2_dummy, mbc2_dummy, NULL,
+											mbc3_ramtim_en, mbc3_rom_bank, mbc3_ramrtc_bank, mbc3_clk, NULL, NULL,
+											mbc5_ram_en, mbc5_rom_bank_low, mbc5_rom_bank_high, mbc5_ram_bank, mbc5_dummy, NULL };
 
 /*
  * Initialize gb_mbc structure.
@@ -99,5 +99,10 @@ mbc_init(int mbc_num)
 		gb_mbc.mbc_funcs[5] = mbc_def_funcs[mbc_num][2];
 		gb_mbc.mbc_funcs[6] = mbc_def_funcs[mbc_num][3];
 		gb_mbc.mbc_funcs[7] = mbc_def_funcs[mbc_num][3];
+
+		//Write to RAM
+		gb_mbc.mbc_funcs[8] = mbc_def_funcs[mbc_num][3];
+		gb_mbc.mbc_funcs[9] = mbc_def_funcs[mbc_num][3];
+		gb_mbc.mbc_funcs[10] = mbc_def_funcs[mbc_num][3];
 	}
 }

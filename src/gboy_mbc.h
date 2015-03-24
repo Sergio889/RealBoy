@@ -25,6 +25,7 @@ extern void mbc1_ram_en(int);
 extern void mbc2_rom_bank(int);
 extern void mbc2_ram_en(int);
 extern void mbc2_ram_wr(int);
+extern void mbc2_dummy(int);
 extern void mbc3_clk(int);
 extern void mbc3_read_rtc();
 extern void mbc3_ramrtc_rdwr(int, int);
