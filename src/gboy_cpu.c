@@ -5722,7 +5722,7 @@ exec_next(int offset)
 
 #ifdef PROFILER
 		//Profiler instruction counter
-		(instruction_counter[(*cpu_state.pc)])++;
+		instruction_counter[*cpu_state.pc]++;
 #endif
 
 		cpu_state.cur_tcks = rec->format[7];
@@ -5735,6 +5735,10 @@ exec_next(int offset)
 			do {
 				if (cpu_state.inst_is_cb)
 					rec = z80_ldex+256+*cpu_state.pc, cpu_state.cur_tcks = rec->format[7];
+#ifdef PROFILER
+					//Profiler instruction counter
+					instruction_counter[*cpu_state.pc+256]++;
+#endif
 				cpu_state.inst_is_cb = 0;
 				if (rec->format[5] & DELAY)
 					execute_precise(rec);

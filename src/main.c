@@ -154,9 +154,10 @@ main(int argc, char *argv[])
 
 #ifdef PROFILER
 	printf("%s", "===================  Awesome profiler stats  ===================\n");
+	print("%s", "Opcode ? Instructions ? Usage\n");
 	Uint16 opcode;
 	for (opcode  = 0; opcode < NUMBER_OF_INSTRUCTIONS; opcode++) {
-		printf("Opcode 0x%x ? %s ? %d\n", opcode, z80_ldex[opcode].name, instruction_counter[opcode]);
+		printf("0x%x ? %s ? %d\n", opcode, z80_ldex[opcode].name, instruction_counter[opcode]);
 	}
 #endif
 
