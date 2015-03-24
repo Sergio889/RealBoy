@@ -20,6 +20,7 @@
 #include "main.h"
 
 #ifdef PROFILER
+#include <time.h>
 #include "gboy_cpu.h"
 extern struct z80_set z80_ldex[];
 extern Uint32 instruction_counter[];
@@ -54,6 +55,11 @@ Options:\n\
 int
 main(int argc, char *argv[])
 {
+#ifdef PROFILER
+	clock_t t;
+	t = clock();
+#endif
+
 	/* If no arguments, print usage and exit. */
 	if (argc==1) {
 		usage(argv[0]);
@@ -153,12 +159,20 @@ main(int argc, char *argv[])
 		usage(argv[0]);
 
 #ifdef PROFILER
+	t = clock() - t;
+	unsigned long long total_instructions;
+
 	printf("%s", "===================  Awesome profiler stats  ===================\n");
-	print("%s", "Opcode ? Instructions ? Usage\n");
+	printf("%s", "Opcode ? Instructions ? Usage\n");
 	Uint16 opcode;
 	for (opcode  = 0; opcode < NUMBER_OF_INSTRUCTIONS; opcode++) {
 		printf("0x%x ? %s ? %d\n", opcode, z80_ldex[opcode].name, instruction_counter[opcode]);
+		total_instructions += instruction_counter[opcode];
 	}
+	printf("%s", "======================\n");
+	printf("Total instructions: %d\n", total_instructions);
+	printf("%s", "Time, it needs time (to win back your love again)\n");
+	printf ("%d clicks (%f seconds).\n",t,((float)t)/CLOCKS_PER_SEC);
 #endif
 
 	return 0;
