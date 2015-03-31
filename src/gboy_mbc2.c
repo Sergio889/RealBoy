@@ -39,7 +39,9 @@ mbc2_ram_en(int val)
 void
 mbc2_ram_wr(int val)
 {
-
+//	else if ((gb_cart.cart_type == 0x6 || gb_cart.cart_type == 0x5 ) && gb_addr >= 0xA000 && gb_addr <= 0xA1FF)
+	//	*host_addr = val&0xf;
+	//TODO
 }
 
 void

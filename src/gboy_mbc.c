@@ -100,7 +100,7 @@ mbc_init(int mbc_num)
 		gb_mbc.mbc_funcs[6] = mbc_def_funcs[mbc_num][3];
 		gb_mbc.mbc_funcs[7] = mbc_def_funcs[mbc_num][3];
 
-		//Write to RAM
+		//Write to RAM TODO
 		gb_mbc.mbc_funcs[8] = mbc_def_funcs[mbc_num][3];
 		gb_mbc.mbc_funcs[9] = mbc_def_funcs[mbc_num][3];
 		gb_mbc.mbc_funcs[10] = mbc_def_funcs[mbc_num][3];

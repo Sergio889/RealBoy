@@ -28,7 +28,7 @@ mem_wr(Uint16 gb_addr, Uint8 val, Uint8 *host_addr)
 	else if (gb_addr <= 0x7fff)
 		(gb_mbc.mbc_funcs[(gb_addr>>12)])(val);
 
-	else if ((gb_cart.cart_type == 0x6 || gb_cart.cart_type == 0x5 ) && gb_addr >= 0xA000 && gb_addr <= 0xA1FF)
+	else if (gb_addr >= 0xA000 && gb_addr <= 0xA1FF)//TODO
 		*host_addr = val&0xf;
 
 	else
