@@ -231,7 +231,7 @@ struct profilerInfo {
 	Uint32 instruction_time_counter;
 } profilerInfo;
 
-profilerInfo profilerData[NUMBER_OF_INSTRUCTIONS];
+struct profilerInfo profilerData[NUMBER_OF_INSTRUCTIONS];
 #endif
 
 

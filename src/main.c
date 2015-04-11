@@ -166,13 +166,13 @@ main(int argc, char *argv[])
 	printf("%s", "Opcode ? Instructions ? Usage\n");
 	Uint16 opcode;
 	for (opcode  = 0; opcode < NUMBER_OF_INSTRUCTIONS; opcode++) {
-		printf("0x%x ? %s ? %d ? %d\n", opcode, z80_ldex[opcode].name, instruction_counter[opcode].instruction_counter, instruction_time_counter);
-		total_instructions += instruction_counter[opcode];
+		printf("0x%x ? %s ? %d ? %d\n", opcode, z80_ldex[opcode].name, profilerData[opcode].instruction_counter, profilerData[opcode].instruction_time_counter);
+		total_instructions += profilerData[opcode].instruction_counter;
 	}
 	printf("%s", "======================\n");
-	printf("Total instructions: %d\n", total_instructions);
+	printf("Total instructions: %llu\n", total_instructions);
 	printf("%s", "Time, it needs time (to win back your love again)\n");
-	printf ("%d clicks (%f seconds).\n",t,((float)t)/CLOCKS_PER_SEC);
+	printf ("%d clicks (%f seconds).\n",(int)t,((float)t)/CLOCKS_PER_SEC);
 #endif
 
 	return 0;

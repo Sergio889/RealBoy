@@ -5736,7 +5736,7 @@ exec_next(int offset)
 
 #ifdef PROFILER
 		//Profiler instruction counter
-		instruction_counter[*cpu_state.pc]++;
+		profilerData[*cpu_state.pc].instruction_counter++;
 #endif
 
 		cpu_state.cur_tcks = rec->format[7];
@@ -5787,7 +5787,7 @@ rom_exec(int offset)
 
 #ifdef PROFILER
 	// Profiler opcodes counter super-array of awesomeness!!!
-	memset(&instruction_counter, 0, sizeof(profilerInfo) * NUMBER_OF_INSTRUCTIONS);
+	memset(&profilerData, 0, sizeof(profilerInfo) * NUMBER_OF_INSTRUCTIONS);
 #endif
 
 	exec_next(offset);
