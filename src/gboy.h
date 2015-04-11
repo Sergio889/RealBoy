@@ -226,6 +226,9 @@ extern Uint8 addr_sp[0x10000];
 extern long addr_sp_ptrs[16];
 
 #ifdef PROFILER
+
+int opcodeInstruct;
+
 struct profilerInfo {
 	Uint32 instruction_counter;
 	Uint32 instruction_time_counter;

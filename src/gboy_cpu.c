@@ -5466,7 +5466,10 @@ execute_precise(struct z80_set *rec)
 #endif
 					rec->func(rec);//Execute instruction
 #ifdef PROFILER
-					profilerData[*cpu_state.pc+256].instruction_time_counter += (clock() - instructionTime);
+					if (cpu_state.inst_is_cb)
+						profilerData[opcodeInstruct + 256].instruction_time_counter += (clock() - instructionTime);
+					else
+						profilerData[opcodeInstruct].instruction_time_counter += (clock() - instructionTime);
 #endif
 
 				}
@@ -5479,7 +5482,10 @@ execute_precise(struct z80_set *rec)
 #endif
 					rec->func(rec);//Execute instruction
 #ifdef PROFILER
-					profilerData[*cpu_state.pc+256].instruction_time_counter += (clock() - instructionTime);
+					if (cpu_state.inst_is_cb)
+						profilerData[opcodeInstruct + 256].instruction_time_counter += (clock() - instructionTime);
+					else
+						profilerData[opcodeInstruct].instruction_time_counter += (clock() - instructionTime);
 #endif
 			}
 last_run:
@@ -5736,7 +5742,8 @@ exec_next(int offset)
 
 #ifdef PROFILER
 		//Profiler instruction counter
-		profilerData[*cpu_state.pc].instruction_counter++;
+		opcodeInstruct = *cpu_state.pc;
+		profilerData[opcodeInstruct].instruction_counter++;
 #endif
 
 		cpu_state.cur_tcks = rec->format[7];
@@ -5747,11 +5754,16 @@ exec_next(int offset)
 		}
 		else {
 			do {
-				if (cpu_state.inst_is_cb)
+				if (cpu_state.inst_is_cb){
 					rec = z80_ldex+256+*cpu_state.pc, cpu_state.cur_tcks = rec->format[7];
+
+#ifdef PROFILER
+					opcodeInstruct += 256;
+#endif
+				}
 #ifdef PROFILER
 					//Profiler instruction counter
-				profilerData[*cpu_state.pc+256].instruction_counter++;
+				profilerData[opcodeInstruct].instruction_counter++;
 #endif
 				cpu_state.inst_is_cb = 0;
 				if (rec->format[5] & DELAY){//Check if flag delay is activated
@@ -5764,9 +5776,13 @@ exec_next(int offset)
 #endif
 					rec->func(rec), timer_divider_update();//Execute instruction
 #ifdef PROFILER
-					profilerData[*cpu_state.pc+256].instruction_time_counter += (clock() - instructionTime);
+					if (cpu_state.inst_is_cb)
+						profilerData[opcodeInstruct + 256].instruction_time_counter += (clock() - instructionTime);
+					else
+						profilerData[opcodeInstruct].instruction_time_counter += (clock() - instructionTime);
 #endif
 				}
+
 			} while (cpu_state.inst_is_cb == 1);
 		}
 		cpu_state.pc = (Uint8 *)(regs_sets.regs[PC].UWord+addr_sp_ptrs[(regs_sets.regs[PC].UWord)>>12]);
