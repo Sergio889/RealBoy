@@ -5439,7 +5439,7 @@ execute_precise(struct z80_set *rec)
 	
 	while (1)
 	{
-		if (cpu_state.write_is_delayed&0x3)
+		if (cpu_state.write_is_delayed & 0x3)
 		{
 			if (cpu_state.write_is_delayed&0x1)
 			{
@@ -5457,16 +5457,30 @@ execute_precise(struct z80_set *rec)
 			ticks--;
 			if (ticks == 0)
 			{
-				if (rec->format[5]&RD_WR)
+				if (rec->format[5] & RD_WR) //Check if instruction is of type RD_WR
 				{
 					cpu_state.write_is_delayed |= rec->format[5];
-					rec->func(rec);
+
+#ifdef PROFILER
+					clock_t instructionTime = clock();
+#endif
+					rec->func(rec);//Execute instruction
+#ifdef PROFILER
+					profilerData[*cpu_state.pc+256].instruction_time_counter += (clock() - instructionTime);
+#endif
+
 				}
 			}
 			else if (ticks<0)
 			{
 				cpu_state.write_is_delayed |= rec->format[5];
-				rec->func(rec);
+#ifdef PROFILER
+					clock_t instructionTime = clock();
+#endif
+					rec->func(rec);//Execute instruction
+#ifdef PROFILER
+					profilerData[*cpu_state.pc+256].instruction_time_counter += (clock() - instructionTime);
+#endif
 			}
 last_run:
 			if ((cpu_state.div_ctrl&0xf) > ((cpu_state.div_ctrl+4)&0xf))
@@ -5737,13 +5751,22 @@ exec_next(int offset)
 					rec = z80_ldex+256+*cpu_state.pc, cpu_state.cur_tcks = rec->format[7];
 #ifdef PROFILER
 					//Profiler instruction counter
-					instruction_counter[*cpu_state.pc+256]++;
+				profilerData[*cpu_state.pc+256].instruction_counter++;
 #endif
 				cpu_state.inst_is_cb = 0;
-				if (rec->format[5] & DELAY)
+				if (rec->format[5] & DELAY){//Check if flag delay is activated
+
 					execute_precise(rec);
-				else
-					rec->func(rec), timer_divider_update();
+				}
+				else{
+#ifdef PROFILER
+					clock_t instructionTime = clock();
+#endif
+					rec->func(rec), timer_divider_update();//Execute instruction
+#ifdef PROFILER
+					profilerData[*cpu_state.pc+256].instruction_time_counter += (clock() - instructionTime);
+#endif
+				}
 			} while (cpu_state.inst_is_cb == 1);
 		}
 		cpu_state.pc = (Uint8 *)(regs_sets.regs[PC].UWord+addr_sp_ptrs[(regs_sets.regs[PC].UWord)>>12]);
@@ -5764,7 +5787,7 @@ rom_exec(int offset)
 
 #ifdef PROFILER
 	// Profiler opcodes counter super-array of awesomeness!!!
-	memset(&instruction_counter, 0, sizeof(instruction_counter));
+	memset(&instruction_counter, 0, sizeof(profilerInfo) * NUMBER_OF_INSTRUCTIONS);
 #endif
 
 	exec_next(offset);
