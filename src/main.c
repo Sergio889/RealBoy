@@ -163,14 +163,21 @@ main(int argc, char *argv[])
 	unsigned long long total_instructions;
 
 	printf("%s", "===================  Awesome profiler stats  ===================\n");
-	printf("%s", "Opcode ? Instructions ? Usage\n");
+	printf("%s", "Opcode ? Instructions ? DELAY ? RD_XOR_WR ? RD_WR ? Ext ? Usage ? Time (ml)\n");
 	Uint16 opcode;
 	for (opcode  = 0; opcode < NUMBER_OF_INSTRUCTIONS; opcode++) {
-		printf("0x%x ? %s ? %d ? %d\n", opcode, z80_ldex[opcode].name, profilerData[opcode].instruction_counter, profilerData[opcode].instruction_time_counter);
+		printf("0x%-4x ? %-15s ? %s ? %s ? %s ? %s ? %10d ? %10d\n",
+				opcode, z80_ldex[opcode].name,
+				(z80_ldex[opcode].format[5] & DELAY) ? "Y" : "N",
+				(z80_ldex[opcode].format[5] & RD_XOR_WR) ? "Y" : "N",
+				(z80_ldex[opcode].format[5] & RD_WR) ? "Y" : "N",
+				(opcode > 0xFF) ? "Y" : "N",
+				profilerData[opcode].instruction_counter,
+				profilerData[opcode].instruction_time_counter);
 		total_instructions += profilerData[opcode].instruction_counter;
 	}
 	printf("%s", "======================\n");
-	printf("Total instructions: %llu\n", total_instructions);
+	printf("Total GameBoy instructions: %llu\n", total_instructions);
 	printf("%s", "Time, it needs time (to win back your love again)\n");
 	printf ("%d clicks (%f seconds).\n",(int)t,((float)t)/CLOCKS_PER_SEC);
 #endif

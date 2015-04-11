@@ -5466,8 +5466,10 @@ execute_precise(struct z80_set *rec)
 #endif
 					rec->func(rec);//Execute instruction
 #ifdef PROFILER
-					profilerData[opcodeInstruct].instruction_time_counter += (clock() - instructionTime);
+					instructionTime = clock() - instructionTime;
+					profilerData[opcodeInstruct].instruction_time_counter += instructionTime;
 #endif
+
 
 				}
 			}
@@ -5479,8 +5481,10 @@ execute_precise(struct z80_set *rec)
 #endif
 					rec->func(rec);//Execute instruction
 #ifdef PROFILER
-					profilerData[opcodeInstruct].instruction_time_counter += (clock() - instructionTime);
+					instructionTime = clock() - instructionTime;
+					profilerData[opcodeInstruct].instruction_time_counter += instructionTime;
 #endif
+
 			}
 last_run:
 			if ((cpu_state.div_ctrl&0xf) > ((cpu_state.div_ctrl+4)&0xf))
@@ -5737,8 +5741,6 @@ exec_next(int offset)
 #ifdef PROFILER
 		//Profiler instruction counter
 		opcodeInstruct = *cpu_state.pc;
-		profilerData[opcodeInstruct].instruction_counter++;
-
 #endif
 
 		cpu_state.cur_tcks = rec->format[7];
@@ -5747,9 +5749,14 @@ exec_next(int offset)
 		if (rec->format[5] & DELAY) {//TODO:try to remove later
 #ifdef PROFILER
 			profilerData[opcodeInstruct].instruction_counter++;
-			printf("Instruction1: %d -- %s\n", opcodeInstruct, z80_ldex[opcodeInstruct].name);
+			//printf("Instruction1: %d -- %s\n", opcodeInstruct, z80_ldex[opcodeInstruct].name);
+			clock_t instructionTime = clock();
 #endif
 			execute_precise(rec);
+#ifdef PROFILER
+					instructionTime = clock() - instructionTime;
+					profilerData[opcodeInstruct].instruction_time_counter += instructionTime;
+#endif
 		}
 		else {
 			do {
@@ -5765,9 +5772,16 @@ exec_next(int offset)
 				if (rec->format[5] & DELAY){//Check if flag delay is activated
 #ifdef PROFILER
 					profilerData[opcodeInstruct].instruction_counter++;
-					printf("Instruction2: %d -- %s\n", opcodeInstruct, z80_ldex[opcodeInstruct].name);
+					//printf("Instruction2: %d -- %s\n", opcodeInstruct, z80_ldex[opcodeInstruct].name);
+					clock_t instructionTime = clock();
 #endif
 					execute_precise(rec);
+#ifdef PROFILER
+					instructionTime = clock() - instructionTime;
+					profilerData[opcodeInstruct].instruction_time_counter += instructionTime;
+#endif
+
+
 				}else{
 #ifdef PROFILER
 					profilerData[opcodeInstruct].instruction_counter++;
@@ -5776,7 +5790,7 @@ exec_next(int offset)
 					rec->func(rec);//Execute instruction
 #ifdef PROFILER
 					instructionTime = clock() - instructionTime;
-					printf("Instruction3: %d -- %s -- time:%d \n", opcodeInstruct, z80_ldex[opcodeInstruct].name, instructionTime);
+					//printf("Instruction3: %d -- %s -- time:%d \n", opcodeInstruct, z80_ldex[opcodeInstruct].name, instructionTime);
 					profilerData[opcodeInstruct].instruction_time_counter += instructionTime;
 #endif
 					timer_divider_update();
