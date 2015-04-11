@@ -5466,10 +5466,7 @@ execute_precise(struct z80_set *rec)
 #endif
 					rec->func(rec);//Execute instruction
 #ifdef PROFILER
-					if (cpu_state.inst_is_cb)
-						profilerData[opcodeInstruct + 256].instruction_time_counter += (clock() - instructionTime);
-					else
-						profilerData[opcodeInstruct].instruction_time_counter += (clock() - instructionTime);
+					profilerData[opcodeInstruct].instruction_time_counter += (clock() - instructionTime);
 #endif
 
 				}
@@ -5482,10 +5479,7 @@ execute_precise(struct z80_set *rec)
 #endif
 					rec->func(rec);//Execute instruction
 #ifdef PROFILER
-					if (cpu_state.inst_is_cb)
-						profilerData[opcodeInstruct + 256].instruction_time_counter += (clock() - instructionTime);
-					else
-						profilerData[opcodeInstruct].instruction_time_counter += (clock() - instructionTime);
+					profilerData[opcodeInstruct].instruction_time_counter += (clock() - instructionTime);
 #endif
 			}
 last_run:
@@ -5744,43 +5738,48 @@ exec_next(int offset)
 		//Profiler instruction counter
 		opcodeInstruct = *cpu_state.pc;
 		profilerData[opcodeInstruct].instruction_counter++;
+
 #endif
 
 		cpu_state.cur_tcks = rec->format[7];
 		if (gbddb==1)
 			gddb_main(0, cpu_state.pc, (Uint8 *)rec);
-		if (rec->format[5] & DELAY) {
+		if (rec->format[5] & DELAY) {//TODO:try to remove later
+#ifdef PROFILER
+			profilerData[opcodeInstruct].instruction_counter++;
+			printf("Instruction1: %d -- %s\n", opcodeInstruct, z80_ldex[opcodeInstruct].name);
+#endif
 			execute_precise(rec);
 		}
 		else {
 			do {
 				if (cpu_state.inst_is_cb){
-					rec = z80_ldex+256+*cpu_state.pc, cpu_state.cur_tcks = rec->format[7];
-
+					rec = z80_ldex + 256 + *cpu_state.pc, cpu_state.cur_tcks = rec->format[7];
 #ifdef PROFILER
-					opcodeInstruct += 256;
+					opcodeInstruct = *cpu_state.pc + 256;
 #endif
 				}
-#ifdef PROFILER
-					//Profiler instruction counter
-				profilerData[opcodeInstruct].instruction_counter++;
-#endif
+
 				cpu_state.inst_is_cb = 0;
-				if (rec->format[5] & DELAY){//Check if flag delay is activated
 
-					execute_precise(rec);
-				}
-				else{
+				if (rec->format[5] & DELAY){//Check if flag delay is activated
 #ifdef PROFILER
+					profilerData[opcodeInstruct].instruction_counter++;
+					printf("Instruction2: %d -- %s\n", opcodeInstruct, z80_ldex[opcodeInstruct].name);
+#endif
+					execute_precise(rec);
+				}else{
+#ifdef PROFILER
+					profilerData[opcodeInstruct].instruction_counter++;
 					clock_t instructionTime = clock();
 #endif
-					rec->func(rec), timer_divider_update();//Execute instruction
+					rec->func(rec);//Execute instruction
 #ifdef PROFILER
-					if (cpu_state.inst_is_cb)
-						profilerData[opcodeInstruct + 256].instruction_time_counter += (clock() - instructionTime);
-					else
-						profilerData[opcodeInstruct].instruction_time_counter += (clock() - instructionTime);
+					instructionTime = clock() - instructionTime;
+					printf("Instruction3: %d -- %s -- time:%d \n", opcodeInstruct, z80_ldex[opcodeInstruct].name, instructionTime);
+					profilerData[opcodeInstruct].instruction_time_counter += instructionTime;
 #endif
+					timer_divider_update();
 				}
 
 			} while (cpu_state.inst_is_cb == 1);
