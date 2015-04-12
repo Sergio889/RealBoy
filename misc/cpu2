@@ -1,0 +1,24 @@
+	while (!chg_gam) {
+		if (cpu_state.inst_is_cb) {
+			rec = z80_ldex + 256 + *cpu_state.pc, cpu_state.cur_tcks = rec->format[7];
+			cpu_state.inst_is_cb = 0;
+		} else {
+			rec = z80_ldex + *cpu_state.pc;
+		}
+
+		cpu_state.cur_tcks = rec->format[7];
+		if (gbddb==1)
+			gddb_main(0, cpu_state.pc, (Uint8 *)rec);
+
+		if (rec->format[5] & DELAY) {
+			execute_precise(rec);
+		} else {
+			rec->func(rec);//Execute instruction
+		}
+
+		if (!cpu_state.inst_is_cb) {
+			cpu_state.pc = (Uint8 *)(regs_sets.regs[PC].UWord+addr_sp_ptrs[(regs_sets.regs[PC].UWord)>>12]);
+			proc_ints();
+			if (addr_sp[LCDC_REG]&0x80)
+				lcd_refrsh();
+		}
