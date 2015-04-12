@@ -162,11 +162,16 @@ main(int argc, char *argv[])
 	t = clock() - t;
 	unsigned long long total_instructions;
 
+	change_cur_dir("/tmp");
+	FILE* dataFile = fopen("profiler.data", "a");
+
 	printf("%s", "===================  Awesome profiler stats  ===================\n");
-	printf("%s", "Opcode ? Instructions ? DELAY ? RD_XOR_WR ? RD_WR ? Ext ? Usage ? Time (ml)\n");
+	fprintf(dataFile, "%s", "===================  Awesome profiler stats  ===================\n");
+	printf("%s", "Opcode - Instructions - DELAY - RD_XOR_WR - RD_WR - Ext - Usage - Time (ml)\n");
+	fprintf(dataFile, "%s", "Opcode ? Instructions ? DELAY ? RD_XOR_WR ? RD_WR ? Ext ? Usage ? Time (ml)\n");
 	Uint16 opcode;
 	for (opcode  = 0; opcode < NUMBER_OF_INSTRUCTIONS; opcode++) {
-		printf("0x%-4x ? %-15s ? %s ? %s ? %s ? %s ? %10d ? %10d\n",
+		printf("0x%-4x, %-15s, %s, %s, %s, %s, %10d, %10d\n",
 				opcode, z80_ldex[opcode].name,
 				(z80_ldex[opcode].format[5] & DELAY) ? "Y" : "N",
 				(z80_ldex[opcode].format[5] & RD_XOR_WR) ? "Y" : "N",
@@ -174,12 +179,30 @@ main(int argc, char *argv[])
 				(opcode > 0xFF) ? "Y" : "N",
 				profilerData[opcode].instruction_counter,
 				profilerData[opcode].instruction_time_counter);
+
+		fprintf(dataFile, "0x%x?%s?%s?%s?%s?%s?%d?%d\n",
+						opcode, z80_ldex[opcode].name,
+						(z80_ldex[opcode].format[5] & DELAY) ? "Y" : "N",
+						(z80_ldex[opcode].format[5] & RD_XOR_WR) ? "Y" : "N",
+						(z80_ldex[opcode].format[5] & RD_WR) ? "Y" : "N",
+						(opcode > 0xFF) ? "Y" : "N",
+						profilerData[opcode].instruction_counter,
+						profilerData[opcode].instruction_time_counter);
+
 		total_instructions += profilerData[opcode].instruction_counter;
 	}
+
 	printf("%s", "======================\n");
+	fprintf(dataFile, "%s", "======================\n");
 	printf("Total GameBoy instructions: %llu\n", total_instructions);
+	fprintf(dataFile, "Total GameBoy instructions: %llu\n", total_instructions);
 	printf("%s", "Time, it needs time (to win back your love again)\n");
+	fprintf(dataFile, "%s", "Time, it needs time (to win back your love again)\n");
 	printf ("%d clicks (%f seconds).\n",(int)t,((float)t)/CLOCKS_PER_SEC);
+	fprintf (dataFile, "%d clicks (%f seconds).\n",(int)t,((float)t)/CLOCKS_PER_SEC);
+
+	fclose(dataFile);
+
 #endif
 
 	return 0;
