@@ -164,7 +164,7 @@ main(int argc, char *argv[])
 
 	change_cur_dir("/tmp");
 	FILE* pgdataFile = fopen("profiler.general_data", "w");
-	FILE* prdataFile = fopen("profiler.run_data", "a");
+	FILE* prdataFile = fopen("profiler.run_data", "w");
 
 	printf("%s", "===================  Awesome profiler stats  ===================\n");
 	fprintf(pgdataFile, "%s", "===================  Awesome profiler stats  ===================\n");
@@ -208,6 +208,9 @@ main(int argc, char *argv[])
 	fprintf(prdataFile, "%s", "Time, it needs time (to win back your love again)\n");
 	printf ("%d clicks (%f seconds).\n",(int)t,((float)t)/CLOCKS_PER_SEC);
 	fprintf (prdataFile, "%d clicks (%f seconds).\n",(int)t,((float)t)/CLOCKS_PER_SEC);
+
+	printf ("%s", "\n\nFiles with data in /tmp/profiler.general_data (general instructions data)");
+	printf (" and /tmp/profiler.run_data (data for this run).\n");
 
 	fclose(pgdataFile);
 	fclose(prdataFile);
