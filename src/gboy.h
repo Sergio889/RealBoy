@@ -227,12 +227,23 @@ extern long addr_sp_ptrs[16];
 
 #ifdef PROFILER
 
+typedef unsigned long long ticks;
+static __inline__ ticks getticks(void) {
+     unsigned lo, hi;
+     asm("cpuid");
+     asm volatile("rdtsc" : "=a" (lo), "=d" (hi));
+
+     return ( ((ticks)lo) | ( ((ticks)hi ) << 32) );
+}
+
 int opcodeInstruct;
 
 struct profilerInfo {
-	Uint32 instruction_counter;
-	Uint32 instruction_time_counter;
+	ticks instruction_counter;
+	ticks instruction_time_counter;
 } profilerInfo;
+
+
 
 struct profilerInfo profilerData[NUMBER_OF_INSTRUCTIONS];
 #endif
