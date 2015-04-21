@@ -1,0 +1,25 @@
+* Ambientes Virtuais de Execução
+
+** GameBoy ROM's
+
+http://www.loveroms.com/download/gameboy-color/pokemon-blue-version-ua-/3433 
+http://romhustler.net/roms/gbc
+
+** Realboy Documentation
+https://realboyemulator.wordpress.com/2013/02/08/a-small-exercise-presenting-gddb/
+http://sourceforge.net/projects/realboy/
+
+** MBC2
+http://gbdev.gg8.se/wiki/articles/Memory_Bank_Controllers
+
+Especificação Técnica (desenhos)
+http://fms.komkon.org/GameBoy/Tech/Carts.html
+
+*** Jogos que usam MBC2
+"Final Fantasy Adventure," "Final Fantasy Legend," or "Kid Icarus of Myths and Monsters."
+
+** Bugs Found (and tested on original code)
+- Arkanoid: buggy when we use buttons asd
+- F1 Pole Position MBC1: no game/blank screen
+- R-Type graph bugs on level 2, dark square around moving monsters blinks and disapears), looks like artifact
+- PowerRacer: segmentation fault

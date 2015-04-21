@@ -5462,12 +5462,14 @@ execute_precise(struct z80_set *rec)
 					cpu_state.write_is_delayed |= rec->format[5];
 
 #ifdef PROFILER
-					clock_t instructionTime = clock();
+					realCpuTicks instructionTime = getrealCpuTicks();
 #endif
 					rec->func(rec);//Execute instruction
 #ifdef PROFILER
-					profilerData[opcodeInstruct].instruction_time_counter += (clock() - instructionTime);
+					realCpuTicks instructionTimeEnd = getrealCpuTicks();
+					profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
 #endif
+
 
 				}
 			}
@@ -5475,12 +5477,14 @@ execute_precise(struct z80_set *rec)
 			{
 				cpu_state.write_is_delayed |= rec->format[5];
 #ifdef PROFILER
-					clock_t instructionTime = clock();
+					realCpuTicks instructionTime = getrealCpuTicks();
 #endif
 					rec->func(rec);//Execute instruction
 #ifdef PROFILER
-					profilerData[opcodeInstruct].instruction_time_counter += (clock() - instructionTime);
+					realCpuTicks instructionTimeEnd = getrealCpuTicks();
+					profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
 #endif
+
 			}
 last_run:
 			if ((cpu_state.div_ctrl&0xf) > ((cpu_state.div_ctrl+4)&0xf))
@@ -5724,6 +5728,36 @@ proc_ints()
 /*
  * Execution routine.
  */
+
+/* Clear code
+ while (!chg_gam) {
+	if (cpu_state.inst_is_cb) {
+			rec = z80_ldex + 256 + *cpu_state.pc, cpu_state.cur_tcks = rec->format[7];
+			cpu_state.inst_is_cb = 0;
+	} else {
+			rec = z80_ldex + *cpu_state.pc;
+	}
+
+	cpu_state.cur_tcks = rec->format[7];
+	if (gbddb==1)
+			gddb_main(0, cpu_state.pc, (Uint8 *)rec);
+
+	if (rec->format[5] & DELAY) {
+			execute_precise(rec);
+	} else {
+			rec->func(rec);//Execute instruction
+	}
+
+	if (!cpu_state.inst_is_cb) {
+			cpu_state.pc = (Uint8 *)(regs_sets.regs[PC].UWord+addr_sp_ptrs[(regs_sets.regs[PC].UWord)>>12]);
+			proc_ints();
+			if (addr_sp[LCDC_REG]&0x80)
+					lcd_refrsh();
+	}%
+ */
+
+#ifdef PROFILER
+
 void
 exec_next(int offset)
 {
@@ -5734,51 +5768,44 @@ exec_next(int offset)
 	while (!chg_gam) {
 		rec = z80_ldex + *cpu_state.pc;
 
-#ifdef PROFILER
 		//Profiler instruction counter
 		opcodeInstruct = *cpu_state.pc;
-		profilerData[opcodeInstruct].instruction_counter++;
-
-#endif
-
 		cpu_state.cur_tcks = rec->format[7];
 		if (gbddb==1)
 			gddb_main(0, cpu_state.pc, (Uint8 *)rec);
 		if (rec->format[5] & DELAY) {//TODO:try to remove later
-#ifdef PROFILER
 			profilerData[opcodeInstruct].instruction_counter++;
-			printf("Instruction1: %d -- %s\n", opcodeInstruct, z80_ldex[opcodeInstruct].name);
-#endif
+			//printf("Instruction1: %d -- %s\n", opcodeInstruct, z80_ldex[opcodeInstruct].name);
+			realCpuTicks instructionTime = getrealCpuTicks();
 			execute_precise(rec);
+					realCpuTicks instructionTimeEnd = getrealCpuTicks();
+					profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
 		}
 		else {
 			do {
 				if (cpu_state.inst_is_cb){
 					rec = z80_ldex + 256 + *cpu_state.pc, cpu_state.cur_tcks = rec->format[7];
-#ifdef PROFILER
 					opcodeInstruct = *cpu_state.pc + 256;
-#endif
 				}
 
 				cpu_state.inst_is_cb = 0;
 
 				if (rec->format[5] & DELAY){//Check if flag delay is activated
-#ifdef PROFILER
 					profilerData[opcodeInstruct].instruction_counter++;
-					printf("Instruction2: %d -- %s\n", opcodeInstruct, z80_ldex[opcodeInstruct].name);
-#endif
+					//printf("Instruction2: %d -- %s\n", opcodeInstruct, z80_ldex[opcodeInstruct].name);
+					realCpuTicks instructionTime = getrealCpuTicks();
 					execute_precise(rec);
+					realCpuTicks instructionTimeEnd = getrealCpuTicks();
+					profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
+
+
 				}else{
-#ifdef PROFILER
 					profilerData[opcodeInstruct].instruction_counter++;
-					clock_t instructionTime = clock();
-#endif
+					realCpuTicks instructionTime = getrealCpuTicks();
 					rec->func(rec);//Execute instruction
-#ifdef PROFILER
-					instructionTime = clock() - instructionTime;
-					printf("Instruction3: %d -- %s -- time:%d \n", opcodeInstruct, z80_ldex[opcodeInstruct].name, instructionTime);
-					profilerData[opcodeInstruct].instruction_time_counter += instructionTime;
-#endif
+					realCpuTicks instructionTimeEnd = getrealCpuTicks();
+					//printf("Instruction3: %d -- %s -- time:%d \n", opcodeInstruct, z80_ldex[opcodeInstruct].name, instructionTime);
+					profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
 					timer_divider_update();
 				}
 
@@ -5791,6 +5818,54 @@ exec_next(int offset)
 	}
 	chg_gam = 0;
 }
+
+#else
+void
+exec_next(int offset)
+{
+	static struct z80_set *rec;
+
+	cpu_state.pc = addr_sp+offset;
+
+	while (!chg_gam) {
+		rec = z80_ldex + *cpu_state.pc;
+
+
+		cpu_state.cur_tcks = rec->format[7];
+		if (gbddb==1)
+			gddb_main(0, cpu_state.pc, (Uint8 *)rec);
+		if (rec->format[5] & DELAY) {//TODO:try to remove later
+			execute_precise(rec);
+		}
+		else {
+			do {
+				if (cpu_state.inst_is_cb){
+					rec = z80_ldex + 256 + *cpu_state.pc, cpu_state.cur_tcks = rec->format[7];
+				}
+
+				cpu_state.inst_is_cb = 0;
+
+				if (rec->format[5] & DELAY){//Check if flag delay is activated
+					execute_precise(rec);
+
+
+				}else{
+					rec->func(rec);//Execute instruction
+					timer_divider_update();
+				}
+
+			} while (cpu_state.inst_is_cb == 1);
+		}
+		cpu_state.pc = (Uint8 *)(regs_sets.regs[PC].UWord+addr_sp_ptrs[(regs_sets.regs[PC].UWord)>>12]);
+		proc_ints();
+		if (addr_sp[LCDC_REG]&0x80)
+			lcd_refrsh();
+	}
+	chg_gam = 0;
+}
+#endif
+
+
 
 /*
  * Prepare to execute

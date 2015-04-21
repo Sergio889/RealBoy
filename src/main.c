@@ -160,19 +160,60 @@ main(int argc, char *argv[])
 
 #ifdef PROFILER
 	t = clock() - t;
-	unsigned long long total_instructions;
+	unsigned long long total_instructions = 0, total_time = 0;
+
+	change_cur_dir("/tmp");
+	FILE* pgdataFile = fopen("profiler.general_data", "w");
+	FILE* prdataFile = fopen("profiler.run_data", "w");
 
 	printf("%s", "===================  Awesome profiler stats  ===================\n");
-	printf("%s", "Opcode ? Instructions ? Usage\n");
+	fprintf(pgdataFile, "%s", "===================  Awesome profiler stats  ===================\n");
+	fprintf(prdataFile, "%s", "===================  Awesome profiler stats  ===================\n");
+	printf("%s", "Opcode - Instruction - DELAY - RD_XOR_WR - RD_WR - Ext - Usage - Time (ml)\n");
+	fprintf(pgdataFile, "%s", "Opcode?Opcode(0x)?Instruction?DELAY?RD_XOR_WR?RD_WR?Ext\n");
+	fprintf(prdataFile, "%s", "Opcode?Usage?Time (ml)\n");
+
 	Uint16 opcode;
 	for (opcode  = 0; opcode < NUMBER_OF_INSTRUCTIONS; opcode++) {
-		printf("0x%x ? %s ? %llu ? %llu\n", opcode, z80_ldex[opcode].name, profilerData[opcode].instruction_counter, profilerData[opcode].instruction_time_counter);
+		printf("0x%-4x, %-15s, %s, %s, %s, %s, %10llu, %10llu\n",
+				opcode, z80_ldex[opcode].name,
+				(z80_ldex[opcode].format[5] & DELAY) ? "Y" : "N",
+				(z80_ldex[opcode].format[5] & RD_XOR_WR) ? "Y" : "N",
+				(z80_ldex[opcode].format[5] & RD_WR) ? "Y" : "N",
+				(opcode > 0xFF) ? "Y" : "N",
+				profilerData[opcode].instruction_counter,
+				profilerData[opcode].instruction_time_counter);
+
+		fprintf(pgdataFile, "%d?0x%x?%s?%s?%s?%s?%s\n",
+						opcode, opcode, z80_ldex[opcode].name,
+						(z80_ldex[opcode].format[5] & DELAY) ? "Y" : "N",
+						(z80_ldex[opcode].format[5] & RD_XOR_WR) ? "Y" : "N",
+						(z80_ldex[opcode].format[5] & RD_WR) ? "Y" : "N",
+						(opcode > 0xFF) ? "Y" : "N");
+
+		fprintf(prdataFile, "%d?%llu?%llu\n",
+						opcode,
+						profilerData[opcode].instruction_counter,
+						profilerData[opcode].instruction_time_counter);
+
 		total_instructions += profilerData[opcode].instruction_counter;
+		total_time += profilerData[opcode].instruction_time_counter;
 	}
+
 	printf("%s", "======================\n");
-	printf("Total instructions: %llu\n", total_instructions);
+	fprintf(prdataFile, "%s", "======================\n");
+	printf("Total GameBoy instructions: %llu\n", total_instructions);
+	fprintf(prdataFile, "Total GameBoy instructions: %llu\n", total_instructions);
 	printf("%s", "Time, it needs time (to win back your love again)\n");
+	fprintf(prdataFile, "%s", "Time, it needs time (to win back your love again)\n");
 	printf ("%d clicks (%f seconds).\n",(int)t,((float)t)/CLOCKS_PER_SEC);
+	fprintf (prdataFile, "%d clicks (%f seconds).\n",(int)t,((float)t)/CLOCKS_PER_SEC);
+
+	printf ("%s", "\n\nFiles with data in /tmp/profiler.general_data (general instructions data)");
+	printf (" and /tmp/profiler.run_data (data for this run).\n");
+
+	fclose(pgdataFile);
+	fclose(prdataFile);
 #endif
 
 	return 0;
