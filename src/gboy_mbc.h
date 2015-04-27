@@ -18,23 +18,23 @@
 extern long addr_sp_ptrs[0x10]; // pointer to address spaces
 
 /* Functions defined in gboy_mbcX.c */
-extern void mbc1_mode(int);
-extern void mbc1_ram_bank(int);
-extern void mbc1_rom_bank(int);
-extern void mbc1_ram_en(int);
-extern void mbc2_rom_bank(int);
-extern void mbc2_ram_en(int);
-extern void mbc2_ram_wr(int);
-extern void mbc2_dummy(int);
-extern void mbc3_clk(int);
+extern void mbc1_mode(Uint8*, int);
+extern void mbc1_ram_bank(Uint8*, int);
+extern void mbc1_rom_bank(Uint8*, int);
+extern void mbc1_ram_en(Uint8*, int);
+extern void mbc2_rom_bank(Uint8*, int);
+extern void mbc2_ram_en(Uint8*, int);
+extern void mbc2_ram_wr(Uint8*, int);
+extern void mbc2_dummy(Uint8*, int);
+extern void mbc3_clk(Uint8*, int);
 extern void mbc3_read_rtc();
-extern void mbc3_ramrtc_rdwr(int, int);
-extern void mbc3_ramrtc_bank(int);
-extern void mbc3_rom_bank(int);
-extern void mbc3_ramtim_en(int);
-extern void mbc5_mode(int);
-extern void mbc5_ram_bank(int);
-extern void mbc5_rom_bank_low(int);
-extern void mbc5_rom_bank_high(int);
-extern void mbc5_ram_en(int);
-extern void mbc5_dummy(int);
+extern void mbc3_ramrtc_rdwr(int, int);//Funcao fantasma
+extern void mbc3_ramrtc_bank(Uint8*, int);
+extern void mbc3_rom_bank(Uint8*, int);
+extern void mbc3_ramtim_en(Uint8*, int);
+extern void mbc5_mode(int);//Funcao fantasma
+extern void mbc5_ram_bank(Uint8*, int);
+extern void mbc5_rom_bank_low(Uint8*, int);
+extern void mbc5_rom_bank_high(Uint8*, int);
+extern void mbc5_ram_en(Uint8*, int);
+extern void mbc5_dummy(Uint8*, int);

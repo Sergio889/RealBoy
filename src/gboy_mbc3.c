@@ -141,7 +141,7 @@ mbc3_ram_remap()
 }
 
 void
-mbc3_clk(int val)
+mbc3_clk(Uint8 *addr, int val)
 {
 	if (gb_mbc.mbc_rtc_latch==0 && val==1)
 		mbc3_latch_rtc();
@@ -150,7 +150,7 @@ mbc3_clk(int val)
 }
 
 void
-mbc3_ramrtc_bank(int val)
+mbc3_ramrtc_bank(Uint8 *addr, int val)
 {
 	if (val >= 8)
 		gb_mbc.mbc_rtc_reg_sel = val&0x0f;
@@ -163,7 +163,7 @@ mbc3_ramrtc_bank(int val)
 }
 
 void
-mbc3_rom_bank(int val)
+mbc3_rom_bank(Uint8 *addr, int val)
 {
 	if (val==0)
 		gb_cart.cart_curom_bank = 1; // new ROM bank
@@ -174,7 +174,7 @@ mbc3_rom_bank(int val)
 }
 
 void
-mbc3_ramtim_en(int val)
+mbc3_ramtim_en(Uint8 *addr, int val)
 {
 	/* Sync RAM file */
 	if ((val&=0xf) != 0xa) {

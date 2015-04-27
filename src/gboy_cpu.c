@@ -5729,7 +5729,7 @@ proc_ints()
  * Execution routine.
  */
 
-/* Clear code
+/* ----Clear code----
  while (!chg_gam) {
 	if (cpu_state.inst_is_cb) {
 			rec = z80_ldex + 256 + *cpu_state.pc, cpu_state.cur_tcks = rec->format[7];
@@ -5775,11 +5775,12 @@ exec_next(int offset)
 			gddb_main(0, cpu_state.pc, (Uint8 *)rec);
 		if (rec->format[5] & DELAY) {//TODO:try to remove later
 			profilerData[opcodeInstruct].instruction_counter++;
-			//printf("Instruction1: %d -- %s\n", opcodeInstruct, z80_ldex[opcodeInstruct].name);
 			realCpuTicks instructionTime = getrealCpuTicks();
+
 			execute_precise(rec);
-					realCpuTicks instructionTimeEnd = getrealCpuTicks();
-					profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
+
+			realCpuTicks instructionTimeEnd = getrealCpuTicks();
+			profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
 		}
 		else {
 			do {
@@ -5792,9 +5793,10 @@ exec_next(int offset)
 
 				if (rec->format[5] & DELAY){//Check if flag delay is activated
 					profilerData[opcodeInstruct].instruction_counter++;
-					//printf("Instruction2: %d -- %s\n", opcodeInstruct, z80_ldex[opcodeInstruct].name);
 					realCpuTicks instructionTime = getrealCpuTicks();
+
 					execute_precise(rec);
+
 					realCpuTicks instructionTimeEnd = getrealCpuTicks();
 					profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
 
@@ -5802,9 +5804,10 @@ exec_next(int offset)
 				}else{
 					profilerData[opcodeInstruct].instruction_counter++;
 					realCpuTicks instructionTime = getrealCpuTicks();
+
 					rec->func(rec);//Execute instruction
+
 					realCpuTicks instructionTimeEnd = getrealCpuTicks();
-					//printf("Instruction3: %d -- %s -- time:%d \n", opcodeInstruct, z80_ldex[opcodeInstruct].name, instructionTime);
 					profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
 					timer_divider_update();
 				}
@@ -5820,6 +5823,8 @@ exec_next(int offset)
 }
 
 #else
+
+
 void
 exec_next(int offset)
 {
@@ -5828,10 +5833,10 @@ exec_next(int offset)
 	cpu_state.pc = addr_sp+offset;
 
 	while (!chg_gam) {
+
 		rec = z80_ldex + *cpu_state.pc;
-
-
 		cpu_state.cur_tcks = rec->format[7];
+
 		if (gbddb==1)
 			gddb_main(0, cpu_state.pc, (Uint8 *)rec);
 		if (rec->format[5] & DELAY) {//TODO:try to remove later

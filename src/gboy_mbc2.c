@@ -20,14 +20,14 @@
 #include "gboy_mbc2.h"
 
 void
-mbc2_rom_bank(int val)
+mbc2_rom_bank(Uint8 *addr, int val)
 {
 	gb_cart.cart_curom_bank = val & 0xf; // update current ROM bank
 	mbc_rom_remap();
 }
 
 void
-mbc2_ram_en(int val)
+mbc2_ram_en(Uint8 *addr, int val)
 {
 	/* Sync RAM file */
 	if (((val&=0xf) != 0xa) && (gb_cart.cart_ram_banks!=NULL)) {
@@ -37,15 +37,13 @@ mbc2_ram_en(int val)
 }
 
 void
-mbc2_ram_wr(int val)
+mbc2_ram_wr(Uint8 *host_addr, int val)
 {
-//	else if ((gb_cart.cart_type == 0x6 || gb_cart.cart_type == 0x5 ) && gb_addr >= 0xA000 && gb_addr <= 0xA1FF)
-	//	*host_addr = val&0xf;
-	//TODO
+		*host_addr = val;
 }
 
 void
-mbc2_dummy(int val)
+mbc2_dummy(Uint8 *addr, int val)
 {
 	return;
 }

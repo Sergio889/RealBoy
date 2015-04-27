@@ -20,7 +20,7 @@
 #include "gboy_mbc1.h"
 
 void
-mbc1_mode(int val)
+mbc1_mode(Uint8 *addr, int val)
 {
 	if ((val&=1) == 0)
 		gb_mbc.mbc_ram_rom_mode = ROM_BANK_MODE, gb_cart.cart_curom_bank |= gb_mbc.mbc_ram_rom_upp<<5;
@@ -30,7 +30,7 @@ mbc1_mode(int val)
 }
 
 void
-mbc1_ram_bank(int val)
+mbc1_ram_bank(Uint8 *addr, int val)
 {
 	gb_mbc.mbc_ram_rom_upp = val &= 0x3;
 
@@ -50,7 +50,7 @@ mbc1_ram_bank(int val)
  * Select ROM bank for mbc1.
  */
 void
-mbc1_rom_bank(int val)
+mbc1_rom_bank(Uint8 *addr, int val)
 {
 	if (val == 0x20 || val == 0x40 || val == 0x60 || val == 0)
 		gb_cart.cart_curom_bank = (val&0x3f)+1;
@@ -64,7 +64,7 @@ mbc1_rom_bank(int val)
  * Enable RAM for mbc1
  */
 void
-mbc1_ram_en(int val)
+mbc1_ram_en(Uint8 *addr, int val)
 {
 	/* Sync RAM file */
 	if (((val&=0xf) != 0xa) && (gb_cart.cart_ram_banks!=NULL)) {

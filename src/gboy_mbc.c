@@ -19,6 +19,14 @@
 #include "gboy.h"
 #include "gboy_mbc.h"
 
+#define MBC_2 1
+#define MBC_5 3
+
+//ESTA FUNÇAO TEM QUE SER MUDADA
+void generic_write(Uint8 *host_addr, int val){
+	*host_addr = val;
+}
+
 /*
  * General RAM remap function.
  */
@@ -40,8 +48,8 @@ mbc_rom_remap()
 /*
  * Main structure holding the various mbcX-specific functions.
  */
-static void (*mbc_def_funcs[4][6])(int) = { mbc1_ram_en, mbc1_rom_bank, mbc1_ram_bank, mbc1_mode, NULL, NULL,
-											mbc2_ram_en, mbc2_rom_bank, mbc2_dummy, mbc2_dummy, mbc2_dummy, NULL,
+static void (*mbc_def_funcs[4][6])(Uint8*, int) = { mbc1_ram_en, mbc1_rom_bank, mbc1_ram_bank, mbc1_mode, NULL, NULL,
+											mbc2_ram_en, mbc2_rom_bank, mbc2_dummy, mbc2_dummy, mbc2_ram_wr, mbc2_dummy,
 											mbc3_ramtim_en, mbc3_rom_bank, mbc3_ramrtc_bank, mbc3_clk, NULL, NULL,
 											mbc5_ram_en, mbc5_rom_bank_low, mbc5_rom_bank_high, mbc5_ram_bank, mbc5_dummy, NULL };
 
@@ -78,31 +86,39 @@ mbc_init(int mbc_num)
 			mbc_num = 3;
 			break;
 	};
-
-	if (mbc_num == 3) {
-		gb_mbc.mbc_funcs[0] = mbc_def_funcs[mbc_num][0];
-		gb_mbc.mbc_funcs[1] = mbc_def_funcs[mbc_num][0];
-		gb_mbc.mbc_funcs[2] = mbc_def_funcs[mbc_num][1];
-		gb_mbc.mbc_funcs[3] = mbc_def_funcs[mbc_num][2];
-		gb_mbc.mbc_funcs[4] = mbc_def_funcs[mbc_num][3];
-		gb_mbc.mbc_funcs[5] = mbc_def_funcs[mbc_num][3];
-		gb_mbc.mbc_funcs[6] = mbc_def_funcs[mbc_num][4];
-		gb_mbc.mbc_funcs[7] = mbc_def_funcs[mbc_num][4];
+	int i;
+	if (mbc_num == MBC_5) {
+		for(i = 0; i <= 0xFF; i++){
+			if(i < 0x20)
+				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][0];
+			else if(i < 0x30)
+				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][1];
+			else if(i < 0x40)
+				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][2];
+			else if(i < 0x60)
+				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][3];
+			else if(i < 0x80)
+				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][4];
+			else
+				gb_mbc.mbc_funcs[i] = generic_write;
+		}
 	}
-	
 	else {
-		gb_mbc.mbc_funcs[0] = mbc_def_funcs[mbc_num][0];
-		gb_mbc.mbc_funcs[1] = mbc_def_funcs[mbc_num][0];
-		gb_mbc.mbc_funcs[2] = mbc_def_funcs[mbc_num][1];
-		gb_mbc.mbc_funcs[3] = mbc_def_funcs[mbc_num][1];
-		gb_mbc.mbc_funcs[4] = mbc_def_funcs[mbc_num][2];
-		gb_mbc.mbc_funcs[5] = mbc_def_funcs[mbc_num][2];
-		gb_mbc.mbc_funcs[6] = mbc_def_funcs[mbc_num][3];
-		gb_mbc.mbc_funcs[7] = mbc_def_funcs[mbc_num][3];
-
-		//Write to RAM TODO
-		gb_mbc.mbc_funcs[8] = mbc_def_funcs[mbc_num][3];
-		gb_mbc.mbc_funcs[9] = mbc_def_funcs[mbc_num][3];
-		gb_mbc.mbc_funcs[10] = mbc_def_funcs[mbc_num][3];
+		for(i = 0; i <= 0xFF; i++){
+			if(i < 0x20)
+				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][0];
+			else if(i < 0x40)
+				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][1];
+			else if(i < 0x60)
+				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][2];
+			else if(i < 0x80)
+				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][3];
+			else if(mbc_num == MBC_2 && i > 0x99 && i < 0xA2)
+				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][4];
+			else if(mbc_num == MBC_2 && i > 0xA2 && i < 0xC0)
+				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][5];
+			else
+				gb_mbc.mbc_funcs[i] = generic_write;
+		}
 	}
 }

@@ -189,8 +189,7 @@ struct gb_cart {
  * YOU HAVE BEEN WARNED.
  */
 struct gb_mbc {
-	void (*mbc_funcs[8])(int); // MBC generic functions
-//	void (*mbc_funcs_w[2])(int); // MBC generic functions//TODO
+	void (*mbc_funcs[256])(Uint8*, int); // MBC generic functions -- args:(addr, val)
 	time_t mbc_rtc_last;
 	long mbc_rtc_regs[5]; // MBC3 RTC's registers
 	char mbc_rtc_latch;

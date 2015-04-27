@@ -20,14 +20,14 @@
 #include "gboy_mbc5.h"
 
 void
-mbc5_dummy(int val)
+mbc5_dummy(Uint8 *addr, int val)
 {
 	gb_cart.cart_curam_bank = (val&0x0f);
 	mbc_ram_remap();
 }
 
 void
-mbc5_ram_bank(int val)
+mbc5_ram_bank(Uint8 *addr, int val)
 {
 	gb_cart.cart_curam_bank = (val&0x0f);
 	mbc_ram_remap();
@@ -37,7 +37,7 @@ mbc5_ram_bank(int val)
  * Select ROM bank for mbc5.
  */
 void
-mbc5_rom_bank_low(int val)
+mbc5_rom_bank_low(Uint8 *addr, int val)
 {
 	gb_cart.cart_curom_bank &= 0x100; // clear lower 8 bits
 	gb_cart.cart_curom_bank |= (val&0xff); // copy new lower 8 bits
@@ -51,7 +51,7 @@ mbc5_rom_bank_low(int val)
  * Select ROM bank for mbc5.
  */
 void
-mbc5_rom_bank_high(int val)
+mbc5_rom_bank_high(Uint8 *addr, int val)
 {
 	gb_cart.cart_curom_bank &= 0xff; // clear 9th bit
 	gb_cart.cart_curom_bank |= (val&0x100); // copy new 9th bit
@@ -65,7 +65,7 @@ mbc5_rom_bank_high(int val)
  * Enable RAM for mbc5.
  */
 void
-mbc5_ram_en(int val)
+mbc5_ram_en(Uint8 *addr, int val)
 {
 	/* Sync RAM file */
 	if (((val&=0xf) != 0xa) && (gb_cart.cart_ram_banks!=NULL)) {
