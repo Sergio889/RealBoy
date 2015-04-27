@@ -39,7 +39,7 @@ mbc2_ram_en(Uint8 *addr, int val)
 void
 mbc2_ram_wr(Uint8 *host_addr, int val)
 {
-		*host_addr = val;
+		*host_addr = val&0xf;
 }
 
 void
