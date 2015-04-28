@@ -113,9 +113,9 @@ mbc_init(int mbc_num)
 				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][2];
 			else if(i < 0x80)
 				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][3];
-			else if(mbc_num == MBC_2 && i > 0x99 && i < 0xA2)
+			else if(mbc_num == MBC_2 && i > 0x9F && i < 0xA2)
 				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][4];
-			else if(mbc_num == MBC_2 && i > 0xA2 && i < 0xC0)
+			else if(mbc_num == MBC_2 && i > 0xA1 && i < 0xC0)
 				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][5];
 			else
 				gb_mbc.mbc_funcs[i] = generic_write;
