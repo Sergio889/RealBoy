@@ -2563,8 +2563,8 @@ op_ret_c(struct z80_set *rec)
 }
 
 /*
- * jmp a16 TODO:Optimize
- *
+ * jmp a16 TODO:Optimize (predecode and use a pointer that points directly to the register where the value of the address is stored)
+ * or have the destiny adress already decoded in the codez!!!
  */
 void
 op_jmp(struct z80_set *rec)
