@@ -86,7 +86,8 @@ mbc_init(int mbc_num)
 			mbc_num = 3;
 			break;
 	};
-	//TODO: I SHALL PUT A THE mbc_funcs MORE SMALLER!
+	//TODO: I SHALL PUT A THE mbc_funcs SMALLER!
+	//Dividir de de FF -> F e por um if para lidar com os casos adicionais do mbc2 (0xA até 0xC)
 	
 	int i;
 	if (mbc_num == MBC_5) {
