@@ -2563,7 +2563,7 @@ op_ret_c(struct z80_set *rec)
 }
 
 /*
- * jmp a16
+ * jmp a16 TODO:Optimize
  *
  */
 void
@@ -5830,7 +5830,7 @@ exec_next(int offset)
 {
 	static struct z80_set *rec;
 
-	cpu_state.pc = addr_sp+offset;
+	cpu_state.pc = addr_sp + offset;
 
 	while (!chg_gam) {
 
