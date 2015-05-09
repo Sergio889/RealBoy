@@ -63,10 +63,10 @@ static void (*mbc_def_funcs[4][6])(Uint8*, int) = { mbc1_ram_en, mbc1_rom_bank, 
 //A0 - A1 && A2 - BF -> 0xA-BF
 void specialCaseForMBC2(Uint8* host_addr, int val){
 
-	if(mbc_num_global_var == MBC_2 && gb_addr_global_var > 0x9F00 && gb_addr_global_var < 0xA200)
-		mbc_def_funcs[mbc_num_global_var][4](host_addr, val);
-	else if(mbc_num_global_var == MBC_2 && gb_addr_global_var > 0xA100 && gb_addr_global_var < 0xC000)
-		mbc_def_funcs[mbc_num_global_var][5](host_addr, val);
+	if( (mbc_num_global_var == MBC_2) && (gb_addr_global_var > 0x9FFF) && (gb_addr_global_var < 0xA200) )
+		mbc_def_funcs[mbc_num_global_var][4](host_addr, val);//The special write of 4 bits to address 0xA0 - 0xA1
+	else if( (mbc_num_global_var == MBC_2) && (gb_addr_global_var > 0xA1FF) && (gb_addr_global_var < 0xC000) )
+		mbc_def_funcs[mbc_num_global_var][5](host_addr, val);//Dummy call
 	else
 		generic_write(host_addr, val);
 }

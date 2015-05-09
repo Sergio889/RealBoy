@@ -220,6 +220,11 @@ extern long gb_clk_rate;
 extern Uint8 addr_sp[0x10000];
 extern long addr_sp_ptrs[16];
 
+
+
+Uint16 gb_addr_global_var;
+int mbc_num_global_var;
+
 /* Awesome Profiler */
 #ifdef PROFILER
 
@@ -246,9 +251,6 @@ struct profilerInfo {
 
 struct profilerInfo profilerData[NUMBER_OF_INSTRUCTIONS];
 #endif
-
-Uint16 gb_addr_global_var;
-int mbc_num_global_var;
 
 
 
