@@ -22,10 +22,9 @@
 void
 mem_wr(Uint16 gb_addr, Uint8 val, Uint8 *host_addr)
 {
-	if (gb_addr >= 0xff00 && gb_addr < 0xff80)
-		io_ctrl_wr(gb_addr&0xff, val);
-	else
-		(gb_mbc.mbc_funcs[(gb_addr>>8)])(host_addr, val);
+	gb_addr_global_var = gb_addr;
+	(gb_mbc.mbc_funcs[(gb_addr>>12)])(host_addr, val);
+
 }
 
 Uint8

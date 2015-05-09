@@ -150,10 +150,6 @@
 #define CGB 1
 #define SGB 2
 
-/* Awesome Profiler */
-#define NUMBER_OF_INSTRUCTIONS 512
-
-
 /*
  * Structures used by RealBoy
  */
@@ -189,7 +185,7 @@ struct gb_cart {
  * YOU HAVE BEEN WARNED.
  */
 struct gb_mbc {
-	void (*mbc_funcs[256])(Uint8*, int); // MBC generic functions -- args:(addr, val)
+	void (*mbc_funcs[0x10])(Uint8*, int); // MBC generic functions -- args:(addr, val)
 	time_t mbc_rtc_last;
 	long mbc_rtc_regs[5]; // MBC3 RTC's registers
 	char mbc_rtc_latch;
@@ -224,7 +220,10 @@ extern long gb_clk_rate;
 extern Uint8 addr_sp[0x10000];
 extern long addr_sp_ptrs[16];
 
+/* Awesome Profiler */
 #ifdef PROFILER
+
+#define NUMBER_OF_INSTRUCTIONS 512
 
 typedef unsigned long long realCpuTicks;
 
@@ -248,7 +247,8 @@ struct profilerInfo {
 struct profilerInfo profilerData[NUMBER_OF_INSTRUCTIONS];
 #endif
 
-
+Uint16 gb_addr_global_var;
+int mbc_num_global_var;
 
 
 
