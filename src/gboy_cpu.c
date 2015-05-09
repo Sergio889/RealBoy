@@ -5462,6 +5462,7 @@ execute_precise(struct z80_set *rec)
 					cpu_state.write_is_delayed |= rec->format[5];
 
 #ifdef PROFILER
+					profilerData[opcodeInstruct].instruction_counter++;
 					realCpuTicks instructionTime = getrealCpuTicks();
 #endif
 					rec->func(rec);//Execute instruction
@@ -5477,14 +5478,14 @@ execute_precise(struct z80_set *rec)
 			{
 				cpu_state.write_is_delayed |= rec->format[5];
 #ifdef PROFILER
-					realCpuTicks instructionTime = getrealCpuTicks();
+				profilerData[opcodeInstruct].instruction_counter++;
+				realCpuTicks instructionTime = getrealCpuTicks();
 #endif
-					rec->func(rec);//Execute instruction
+				rec->func(rec);//Execute instruction
 #ifdef PROFILER
-					realCpuTicks instructionTimeEnd = getrealCpuTicks();
-					profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
+				realCpuTicks instructionTimeEnd = getrealCpuTicks();
+				profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
 #endif
-
 			}
 last_run:
 			if ((cpu_state.div_ctrl&0xf) > ((cpu_state.div_ctrl+4)&0xf))
@@ -5769,18 +5770,13 @@ exec_next(int offset)
 		rec = z80_ldex + *cpu_state.pc;
 
 		//Profiler instruction counter
-		opcodeInstruct = *cpu_state.pc;
+		opcodeInstruct = *cpu_state.pc; //Global var
+
 		cpu_state.cur_tcks = rec->format[7];
 		if (gbddb==1)
 			gddb_main(0, cpu_state.pc, (Uint8 *)rec);
 		if (rec->format[5] & DELAY) {//TODO:try to remove later
-			profilerData[opcodeInstruct].instruction_counter++;
-			realCpuTicks instructionTime = getrealCpuTicks();
-
 			execute_precise(rec);
-
-			realCpuTicks instructionTimeEnd = getrealCpuTicks();
-			profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
 		}
 		else {
 			do {
@@ -5792,14 +5788,7 @@ exec_next(int offset)
 				cpu_state.inst_is_cb = 0;
 
 				if (rec->format[5] & DELAY){//Check if flag delay is activated
-					profilerData[opcodeInstruct].instruction_counter++;
-					realCpuTicks instructionTime = getrealCpuTicks();
-
 					execute_precise(rec);
-
-					realCpuTicks instructionTimeEnd = getrealCpuTicks();
-					profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
-
 
 				}else{
 					profilerData[opcodeInstruct].instruction_counter++;
@@ -5809,6 +5798,7 @@ exec_next(int offset)
 
 					realCpuTicks instructionTimeEnd = getrealCpuTicks();
 					profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
+
 					timer_divider_update();
 				}
 

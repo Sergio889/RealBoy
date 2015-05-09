@@ -221,7 +221,9 @@ extern Uint8 addr_sp[0x10000];
 extern long addr_sp_ptrs[16];
 
 
+//The new code
 
+//Should this go to globals?
 Uint16 gb_addr_global_var;
 int mbc_num_global_var;
 
