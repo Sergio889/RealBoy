@@ -294,6 +294,7 @@ alloc_addr_sp()
 
 	/* Allocate space for rom banks */
 	gb_cart.cart_rom_banks = malloc(0x8000<<gb_cart.cart_rom_size);
+	//gb_cart.cart_rom_banks_predecoded = malloc(0x8000<<gb_cart.cart_rom_size * struct predecoded_code);
 
 	/* Map address range 0x4000-0x7fff to first ROM bank */
 	addr_sp_ptrs[4]=addr_sp_ptrs[5]=addr_sp_ptrs[6]=addr_sp_ptrs[7]=(long)(gb_cart.cart_rom_banks-0x4000);

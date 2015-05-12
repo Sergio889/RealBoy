@@ -168,6 +168,8 @@ struct gb_cart {
 	Uint32 cart_cuvram_bank;
 	Uint32 cart_cuwram_bank;
 	Uint8 *cart_rom_banks;
+	//new
+	Uint8 *cart_rom_banks_predecoded;
 	Uint8 *cart_ram_banks;
 	Uint8 *cart_vram_bank;
 	Uint8 *cart_wram_bank;

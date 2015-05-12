@@ -29,3 +29,5 @@ char *file_path=NULL;
 Uint8 addr_sp[0x10000];
 long chg_gam=0;
 long addr_sp_ptrs[16] = { 0 };
+//new
+long addr_sp_ptrs_predecoded[16] = { 0 };
