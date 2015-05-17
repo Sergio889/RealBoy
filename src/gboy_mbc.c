@@ -128,6 +128,8 @@ mbc_init(int mbc_num)
 				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][3];
 			else if(i < 0x8)
 				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][4];
+			else if (i == 0xF)
+				gb_mbc.mbc_funcs[i] = specialCaseIOControlWrite;
 			else
 				gb_mbc.mbc_funcs[i] = generic_write;
 		}
@@ -144,8 +146,8 @@ mbc_init(int mbc_num)
 				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][3];
 			else if(i > 0x9 && i < 0xC)// 0xA-BF
 				gb_mbc.mbc_funcs[i] = specialCaseForMBC2;
-			else if (i == 0xF)
-				gb_mbc.mbc_funcs[i] = specialCaseIOControlWrite;
+		    else if (i == 0xF)
+			    gb_mbc.mbc_funcs[i] = specialCaseIOControlWrite;
 			else
 				gb_mbc.mbc_funcs[i] = generic_write;//0x8-0x9 && 0xC-0xE
 		}
