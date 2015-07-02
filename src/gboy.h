@@ -236,6 +236,14 @@ int mbc_num_global_var;
 
 typedef unsigned long long realCpuTicks;
 
+#define GET_REAL_CPU_TICKS(CPUToalTicks) { \
+     unsigned lo, hi; \
+     asm volatile("cpuid \n\t rdtsc" : "=a" (lo), "=d" (hi)); \
+     CPUToalTicks = ( ((realCpuTicks)lo) | ( ((realCpuTicks)hi ) << 32) ); \
+}
+
+/*
+//why static? may to force inlining?
 static __inline__ realCpuTicks getrealCpuTicks(void) {
      unsigned lo, hi;
      asm("cpuid");
@@ -243,7 +251,7 @@ static __inline__ realCpuTicks getrealCpuTicks(void) {
 
      return ( ((realCpuTicks)lo) | ( ((realCpuTicks)hi ) << 32) );
 }
-
+*/
 int opcodeInstruct;
 
 struct profilerInfo {
