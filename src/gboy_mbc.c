@@ -63,12 +63,20 @@ static void (*mbc_def_funcs[4][6])(Uint8*, int) = { mbc1_ram_en, mbc1_rom_bank, 
 //A0 - A1 && A2 - BF -> 0xA-BF
 void specialCaseForMBC2(Uint8* host_addr, int val){
 
+	if((gb_addr_global_var >= 0xA000) && (gb_addr_global_var <= 0xA1FF))
+		mbc_def_funcs[mbc_num_global_var][4](host_addr, val);//The special write of 4 bits to address 0xA0 - 0xA1
+	else if((gb_addr_global_var >= 0xA200) && (gb_addr_global_var <= 0xBFFF))
+		mbc_def_funcs[mbc_num_global_var][5](host_addr, val);//Dummy call
+
+
+/*
 	if( (mbc_num_global_var == MBC_2) && (gb_addr_global_var > 0x9FFF) && (gb_addr_global_var < 0xA200) )
 		mbc_def_funcs[mbc_num_global_var][4](host_addr, val);//The special write of 4 bits to address 0xA0 - 0xA1
 	else if( (mbc_num_global_var == MBC_2) && (gb_addr_global_var > 0xA1FF) && (gb_addr_global_var < 0xC000) )
 		mbc_def_funcs[mbc_num_global_var][5](host_addr, val);//Dummy call
 	else
 		generic_write(host_addr, val);
+	*/
 }
 
 //NEW FUNCTION
@@ -112,8 +120,7 @@ mbc_init(int mbc_num)
 			break;
 	};
 	mbc_num_global_var = mbc_num;
-	//TODO: I SHALL PUT A THE mbc_funcs SMALLER!
-	//Dividir de de FF -> F e por um if para lidar com os casos adicionais do mbc2 (0xA até 0xC)
+
 	
 	int i;
 	if (mbc_num == MBC_5) {
@@ -133,8 +140,7 @@ mbc_init(int mbc_num)
 			else
 				gb_mbc.mbc_funcs[i] = generic_write;
 		}
-	}
-	else {
+	}else {
 		for(i = 0; i <= 0xF; i++){
 			if(i < 0x2)
 				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][0];
@@ -144,8 +150,12 @@ mbc_init(int mbc_num)
 				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][2];
 			else if(i < 0x8)
 				gb_mbc.mbc_funcs[i] = mbc_def_funcs[mbc_num][3];
-			else if(i > 0x9 && i < 0xC)// 0xA-BF
-				gb_mbc.mbc_funcs[i] = specialCaseForMBC2;
+			else if(i > 0x9 && i < 0xC){// 0xA-BF
+				if(mbc_num == MBC_2)
+					gb_mbc.mbc_funcs[i] = specialCaseForMBC2;
+				else
+					gb_mbc.mbc_funcs[i] = generic_write;
+			}
 		    else if (i == 0xF)
 			    gb_mbc.mbc_funcs[i] = specialCaseIOControlWrite;
 			else
@@ -153,16 +163,3 @@ mbc_init(int mbc_num)
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
