@@ -19,6 +19,8 @@
 #include "gboy.h"
 #include "gboy_cpu.h"
 
+void op_escape(struct z80_set *rec);
+
 /* 
  * Group 1: Load
  */
@@ -2850,19 +2852,6 @@ op_inval(struct z80_set *rec)
 		;
 }
 
-/*
- * Opcode for escaping to 256 more opcodes.
- *
- */
-void
-op_escape(struct z80_set *rec)
-{
-	cpu_state.pc++;
-	regs_sets.regs[PC].UWord++;
-
-	cpu_state.inst_is_cb = 1;
-}
-
 
 struct z80_set z80_ldex[512] = 
 {
@@ -5427,7 +5416,6 @@ struct z80_set z80_ldex[512] =
 	op_set
 };
 
-
 #ifdef PROFILER
 
 void
@@ -5466,12 +5454,12 @@ execute_precise(struct z80_set *rec)
 
 					profilerData[opcodeInstruct].instruction_counter++;
 					realCpuTicks instructionTime;
-					GET_REAL_CPU_TICKS(instructionTime);
+					GET_REAL_CPU_TICKS(instructionTime)
 
 					rec->func(rec);//Execute instruction
 
 					realCpuTicks instructionTimeEnd;
-					GET_REAL_CPU_TICKS(instructionTimeEnd);
+					GET_REAL_CPU_TICKS(instructionTimeEnd)
 					profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
 				}
 			}
@@ -5480,12 +5468,12 @@ execute_precise(struct z80_set *rec)
 				cpu_state.write_is_delayed |= rec->format[5];
 				profilerData[opcodeInstruct].instruction_counter++;
 				realCpuTicks instructionTime;
-				GET_REAL_CPU_TICKS(instructionTime);
+				GET_REAL_CPU_TICKS(instructionTime)
 
 				rec->func(rec);//Execute instruction
 
 				realCpuTicks instructionTimeEnd;
-				GET_REAL_CPU_TICKS(instructionTimeEnd);
+				GET_REAL_CPU_TICKS(instructionTimeEnd)
 				profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
 			}
 last_run:
@@ -5798,36 +5786,7 @@ proc_ints()
 		}
 	}
 }
-/*
- * Execution routine.
- */
 
-/* ----Clear code----
- while (!chg_gam) {
-	if (cpu_state.inst_is_cb) {
-			rec = z80_ldex + 256 + *cpu_state.pc, cpu_state.cur_tcks = rec->format[7];
-			cpu_state.inst_is_cb = 0;
-	} else {
-			rec = z80_ldex + *cpu_state.pc;
-	}
-
-	cpu_state.cur_tcks = rec->format[7];
-	if (gbddb==1)
-			gddb_main(0, cpu_state.pc, (Uint8 *)rec);
-
-	if (rec->format[5] & DELAY) {
-			execute_precise(rec);
-	} else {
-			rec->func(rec);//Execute instruction
-	}
-
-	if (!cpu_state.inst_is_cb) {
-			cpu_state.pc = (Uint8 *)(regs_sets.regs[PC].UWord+addr_sp_ptrs[(regs_sets.regs[PC].UWord)>>12]);
-			proc_ints();
-			if (addr_sp[LCDC_REG]&0x80)
-					lcd_refrsh();
-	}%
- */
 
 #ifdef PROFILER
 
@@ -5836,47 +5795,35 @@ exec_next(int offset)
 {
 	static struct z80_set *rec;
 
+	printf("OFFSET:%d\n", offset);
 	cpu_state.pc = addr_sp+offset;
 
 	while (!chg_gam) {
 		rec = z80_ldex + *cpu_state.pc;
 
-		opcodeInstruct = *cpu_state.pc; //Global var
+		 //Global var
+		opcodeInstruct = *cpu_state.pc;
 
 		cpu_state.cur_tcks = rec->format[7];
 
 		if (rec->format[5] & DELAY) {//TODO:try to remove later
 			execute_precise(rec);
+		}else{
+			profilerData[opcodeInstruct].instruction_counter++;
+			realCpuTicks instructionTime;
+			GET_REAL_CPU_TICKS(instructionTime)
+
+			rec->func(rec);//Execute instruction
+
+			realCpuTicks instructionTimeEnd;
+			GET_REAL_CPU_TICKS(instructionTimeEnd)
+			profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
+
+			timer_divider_update();
 		}
-		else {
-			do {
-				if (cpu_state.inst_is_cb){
-					rec = z80_ldex + 256 + *cpu_state.pc, cpu_state.cur_tcks = rec->format[7];
-					opcodeInstruct = *cpu_state.pc + 256;
-					cpu_state.inst_is_cb = 0;
-				}
 
-
-				if (rec->format[5] & DELAY){//Check if flag delay is activated
-					execute_precise(rec);
-
-				}else{
-					realCpuTicks instructionTime;
-					profilerData[opcodeInstruct].instruction_counter++;
-					GET_REAL_CPU_TICKS(instructionTime);
-
-					rec->func(rec);//Execute instruction
-
-					realCpuTicks instructionTimeEnd;
-					GET_REAL_CPU_TICKS(instructionTimeEnd);
-					profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
-
-					timer_divider_update();
-				}
-
-			} while (cpu_state.inst_is_cb == 1);
-		}
 		cpu_state.pc = (Uint8 *)(regs_sets.regs[PC].UWord+addr_sp_ptrs[(regs_sets.regs[PC].UWord)>>12]);
+
 		proc_ints();
 		if (addr_sp[LCDC_REG]&0x80)
 			lcd_refrsh();
@@ -5884,61 +5831,7 @@ exec_next(int offset)
 	chg_gam = 0;
 }
 
-void
-exec_next_dbg(int offset)
-{
-	static struct z80_set *rec;
-
-	cpu_state.pc = addr_sp+offset;
-
-	while (!chg_gam) {
-		rec = z80_ldex + *cpu_state.pc;
-
-		opcodeInstruct = *cpu_state.pc; //Global var
-
-		cpu_state.cur_tcks = rec->format[7];
-
-		gddb_main(0, cpu_state.pc, (Uint8 *)rec);
-
-		if (rec->format[5] & DELAY) {//TODO:try to remove later
-			execute_precise(rec);
-		}
-		else {
-			do {
-				if (cpu_state.inst_is_cb){
-					rec = z80_ldex + 256 + *cpu_state.pc, cpu_state.cur_tcks = rec->format[7];
-					opcodeInstruct = *cpu_state.pc + 256;
-					cpu_state.inst_is_cb = 0;
-				}
-
-
-				if (rec->format[5] & DELAY){//Check if flag delay is activated
-					execute_precise(rec);
-
-				}else{
-					realCpuTicks instructionTime;
-					profilerData[opcodeInstruct].instruction_counter++;
-					GET_REAL_CPU_TICKS(instructionTime);
-
-					rec->func(rec);//Execute instruction
-
-					realCpuTicks instructionTimeEnd;
-					GET_REAL_CPU_TICKS(instructionTimeEnd);
-					profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
-
-					timer_divider_update();
-				}
-
-			} while (cpu_state.inst_is_cb == 1);
-		}
-		cpu_state.pc = (Uint8 *)(regs_sets.regs[PC].UWord+addr_sp_ptrs[(regs_sets.regs[PC].UWord)>>12]);
-		proc_ints();
-		if (addr_sp[LCDC_REG]&0x80)
-			lcd_refrsh();
-	}
-	chg_gam = 0;
-}
-
+//No debug while profiling (for now)
 #else
 
 
@@ -5956,35 +5849,22 @@ exec_next(int offset)
 
 		if (rec->format[5] & DELAY) {//TODO:try to remove later
 			execute_precise(rec);
+		}else{
+			rec->func(rec);//Execute instruction
+			timer_divider_update();
 		}
-		else {
-			do {
-				if (cpu_state.inst_is_cb){
-					rec = z80_ldex + 256 + *cpu_state.pc;
-					cpu_state.cur_tcks = rec->format[7];
-					cpu_state.inst_is_cb = 0;
-				}
 
-				if (rec->format[5] & DELAY){//Check if flag delay is activated
-					execute_precise(rec);
-
-				}else{
-					rec->func(rec);//Execute instruction
-					timer_divider_update();
-				}
-
-			} while (cpu_state.inst_is_cb == 1);
-		}
-		cpu_state.pc = (Uint8 *)(regs_sets.regs[PC].UWord+addr_sp_ptrs[(regs_sets.regs[PC].UWord)>>12]);
+		cpu_state.pc = (Uint8 *) ( regs_sets.regs[PC].UWord + addr_sp_ptrs[( regs_sets.regs[PC].UWord ) >> 12] );
 		proc_ints();//check interrupts
 		if (addr_sp[LCDC_REG]&0x80)//LCD refresh bit is set
 			lcd_refrsh();
 	}
 	chg_gam = 0;
+
 }
 
 void
-exec_next_dbg(int offset)
+exec_next_with_dbg(int offset)
 {
 	static struct z80_set *rec;
 
@@ -5997,29 +5877,14 @@ exec_next_dbg(int offset)
 
 		gddb_main(0, cpu_state.pc, (Uint8 *)rec);
 
-
 		if (rec->format[5] & DELAY) {//TODO:try to remove later
 			execute_precise(rec);
+		}else{
+			rec->func(rec);//Execute instruction
+			timer_divider_update();
 		}
-		else {
-			do {
-				if (cpu_state.inst_is_cb){
-					rec = z80_ldex + 256 + *cpu_state.pc;
-					cpu_state.cur_tcks = rec->format[7];
-					cpu_state.inst_is_cb = 0;
-				}
 
-				if (rec->format[5] & DELAY){//Check if flag delay is activated
-					execute_precise(rec);
-
-				}else{
-					rec->func(rec);//Execute instruction
-					timer_divider_update();
-				}
-
-			} while (cpu_state.inst_is_cb == 1);
-		}
-		cpu_state.pc = (Uint8 *)(regs_sets.regs[PC].UWord+addr_sp_ptrs[(regs_sets.regs[PC].UWord)>>12]);
+		cpu_state.pc = (Uint8 *)(regs_sets.regs[PC].UWord + addr_sp_ptrs[(regs_sets.regs[PC].UWord)>>12]);
 		proc_ints();//check interrupts
 		if (addr_sp[LCDC_REG]&0x80)//LCD refresh bit is set
 			lcd_refrsh();
@@ -6041,7 +5906,7 @@ rom_exec(int offset)
 	memset(&cpu_state, 0, sizeof(struct cpu_state));
 	memset(&profilerData, 0, sizeof(profilerInfo) * NUMBER_OF_INSTRUCTIONS);
 	if (gbddb==1)
-		exec_next_dbg(offset);
+		exec_next_with_dbg(offset);
 	else
 		exec_next(offset);
 }
@@ -6054,13 +5919,52 @@ rom_exec(int offset)
 {
 	memset(&cpu_state, 0, sizeof(struct cpu_state));
 	if (gbddb==1)
-		exec_next_dbg(offset);
+		exec_next_with_dbg(offset);
 	else
 		exec_next(offset);
 }
 #endif
 
 
+/*
+ * Opcode for escaping to 256 more opcodes.
+ *
+ */
+void
+op_escape(struct z80_set *rec)
+{
+	cpu_state.pc++;
+	regs_sets.regs[PC].UWord++;
+
+	//cpu_state.inst_is_cb = 1;
+	//This should be dispach responsability!!! but... performance reasons
+
+	rec = z80_ldex + 256 + *cpu_state.pc;
+	cpu_state.cur_tcks = rec->format[7];
+
+	if (rec->format[5] & DELAY){//Check if flag delay is activated
+		execute_precise(rec);
+	}else{
+
+	#ifdef PROFILER
+		opcodeInstruct = *cpu_state.pc + 256;
+		profilerData[opcodeInstruct].instruction_counter++;
+		realCpuTicks instructionTime;
+		GET_REAL_CPU_TICKS(instructionTime)
+
+		rec->func(rec);//Execute instruction
+
+		realCpuTicks instructionTimeEnd;
+		GET_REAL_CPU_TICKS(instructionTimeEnd)
+		profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
+		timer_divider_update();
+
+	#else
+		rec->func(rec);//Execute instruction
+		timer_divider_update();
+	#endif
+	}
+}
 
 
 
