@@ -5427,6 +5427,9 @@ struct z80_set z80_ldex[512] =
 	op_set
 };
 
+
+#ifdef PROFILER
+
 void
 execute_precise(struct z80_set *rec)
 {
@@ -5461,35 +5464,29 @@ execute_precise(struct z80_set *rec)
 				{
 					cpu_state.write_is_delayed |= rec->format[5];
 
-#ifdef PROFILER
 					profilerData[opcodeInstruct].instruction_counter++;
 					realCpuTicks instructionTime;
 					GET_REAL_CPU_TICKS(instructionTime);
-#endif
+
 					rec->func(rec);//Execute instruction
-#ifdef PROFILER
+
 					realCpuTicks instructionTimeEnd;
 					GET_REAL_CPU_TICKS(instructionTimeEnd);
 					profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
-#endif
-
-
 				}
 			}
 			else if (ticks<0)
 			{
 				cpu_state.write_is_delayed |= rec->format[5];
-#ifdef PROFILER
 				profilerData[opcodeInstruct].instruction_counter++;
 				realCpuTicks instructionTime;
 				GET_REAL_CPU_TICKS(instructionTime);
-#endif
+
 				rec->func(rec);//Execute instruction
-#ifdef PROFILER
+
 				realCpuTicks instructionTimeEnd;
 				GET_REAL_CPU_TICKS(instructionTimeEnd);
 				profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
-#endif
 			}
 last_run:
 			if ((cpu_state.div_ctrl&0xf) > ((cpu_state.div_ctrl+4)&0xf))
@@ -5516,6 +5513,77 @@ last_run:
 end_execute_precise:
 	return;
 }
+
+#else
+
+void
+execute_precise(struct z80_set *rec)
+{
+	Sint8 ticks;
+	Uint8 div_tmp;
+
+	cpu_state.write_is_delayed = 0;
+	ticks = (rec->format[7]>>2)-1;
+	div_tmp = cpu_state.div_ctrl;
+
+	while (1)
+	{
+		if (cpu_state.write_is_delayed & 0x3)
+		{
+			if (cpu_state.write_is_delayed&0x1)
+			{
+				if (cpu_state.del_addr != NULLZ) {
+					mem_wr(cpu_state.del_io, cpu_state.del_wr, cpu_state.del_addr);
+				}
+				cpu_state.write_is_delayed = 2;
+				goto last_run;
+			}
+			else
+				goto end_execute_precise;
+		}
+		else
+		{
+			ticks--;
+			if (ticks == 0)
+			{
+				if (rec->format[5] & RD_WR) //Check if instruction is of type RD_WR
+				{
+					cpu_state.write_is_delayed |= rec->format[5];
+					rec->func(rec);//Execute instruction
+				}
+			}
+			else if (ticks<0)
+			{
+				cpu_state.write_is_delayed |= rec->format[5];
+				rec->func(rec);//Execute instruction
+			}
+last_run:
+			if ((cpu_state.div_ctrl&0xf) > ((cpu_state.div_ctrl+4)&0xf))
+			{
+				if (cpu_state.tac_on&0x1)
+				{
+					if (--cpu_state.tac_counter == 0)
+					{
+						cpu_state.tac_counter = cpu_state.tac_reload;
+						if ((++addr_sp[TIMA_REG]) == 0)
+						{
+							addr_sp[IR_REG] |= 4;
+							addr_sp[TIMA_REG] = addr_sp[TMA_REG];
+						}
+					}
+				}
+			}
+			cpu_state.div_ctrl += 4;
+			if (cpu_state.div_ctrl==0)
+				addr_sp[DIV_REG]++;
+		}
+	}
+
+end_execute_precise:
+	return;
+}
+#endif
+
 void
 timer_divider_update()
 {

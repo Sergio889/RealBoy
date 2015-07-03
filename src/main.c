@@ -164,7 +164,7 @@ main(int argc, char *argv[])
 
 	change_cur_dir("/tmp");
 	FILE* pgdataFile = fopen("profiler.general_data", "w");
-	FILE* prdataFile = fopen("profiler.run_data", "w");
+	FILE* prdataFile = fopen("profiler.run_data", "a");
 
 	printf("%s", "===================  Awesome profiler stats  ===================\n");
 	fprintf(pgdataFile, "%s", "===================  Awesome profiler stats  ===================\n");

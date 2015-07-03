@@ -234,24 +234,15 @@ int mbc_num_global_var;
 
 #define NUMBER_OF_INSTRUCTIONS 512
 
-typedef unsigned long long realCpuTicks;
+typedef Uint64 realCpuTicks;
 
+//note: it is created a new scope ( { } ), because of the temporary values lo and hi
 #define GET_REAL_CPU_TICKS(CPUToalTicks) { \
-     unsigned lo, hi; \
+     Uint32 lo, hi; \
      asm volatile("cpuid \n\t rdtsc" : "=a" (lo), "=d" (hi)); \
      CPUToalTicks = ( ((realCpuTicks)lo) | ( ((realCpuTicks)hi ) << 32) ); \
 }
 
-/*
-//why static? may to force inlining?
-static __inline__ realCpuTicks getrealCpuTicks(void) {
-     unsigned lo, hi;
-     asm("cpuid");
-     asm volatile("rdtsc" : "=a" (lo), "=d" (hi));
-
-     return ( ((realCpuTicks)lo) | ( ((realCpuTicks)hi ) << 32) );
-}
-*/
 int opcodeInstruct;
 
 struct profilerInfo {
