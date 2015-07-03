@@ -75,7 +75,6 @@
 struct cpu_state {
 	Uint8 *pc;
 	Uint8 cpu_halt;
-	Uint8 inst_is_cb;
 	Uint8 just_enabled;
 	Uint8 del_wr;
 	Uint16 del_io;

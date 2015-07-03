@@ -5635,7 +5635,6 @@ change_game()
 	spr_cur_extr = 0;
 	cpu_state.just_enabled = 0;
 	cpu_state.write_is_delayed = 0;
-	cpu_state.inst_is_cb = 0;
 
 	regs_sets.regs[AF].UWord = 0;
 	regs_sets.regs[BC].UWord = 0;
@@ -5806,7 +5805,7 @@ exec_next(int offset)
 
 		cpu_state.cur_tcks = rec->format[7];
 
-		if (rec->format[5] & DELAY) {//TODO:try to remove later
+		if (rec->format[5] & DELAY) {
 			execute_precise(rec);
 		}else{
 			profilerData[opcodeInstruct].instruction_counter++;
@@ -5832,6 +5831,7 @@ exec_next(int offset)
 }
 
 //No debug while profiling (for now)
+exec_next_with_dbg(int offset) { exec_next(offset); }
 #else
 
 
@@ -5847,7 +5847,7 @@ exec_next(int offset)
 		rec = z80_ldex + *cpu_state.pc;
 		cpu_state.cur_tcks = rec->format[7];
 
-		if (rec->format[5] & DELAY) {//TODO:try to remove later
+		if (rec->format[5] & DELAY) {
 			execute_precise(rec);
 		}else{
 			rec->func(rec);//Execute instruction
@@ -5877,7 +5877,7 @@ exec_next_with_dbg(int offset)
 
 		gddb_main(0, cpu_state.pc, (Uint8 *)rec);
 
-		if (rec->format[5] & DELAY) {//TODO:try to remove later
+		if (rec->format[5] & DELAY) {
 			execute_precise(rec);
 		}else{
 			rec->func(rec);//Execute instruction
