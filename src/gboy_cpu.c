@@ -5937,7 +5937,7 @@ op_escape(struct z80_set *rec)
 	regs_sets.regs[PC].UWord++;
 
 	//cpu_state.inst_is_cb = 1;
-	//This should be dispach responsability!!! but... performance reasons
+	//This should be the dispacher responsability!!! but... performance reasons
 
 	rec = z80_ldex + 256 + *cpu_state.pc;
 	cpu_state.cur_tcks = rec->format[7];
@@ -5947,8 +5947,8 @@ op_escape(struct z80_set *rec)
 	}else{
 
 	#ifdef PROFILER
-		opcodeInstruct = *cpu_state.pc + 256;
-		profilerData[opcodeInstruct].instruction_counter++;
+		Uint16 opcodeInstructHolder = *cpu_state.pc + 256;
+		profilerData[opcodeInstructHolder].instruction_counter++;
 		realCpuTicks instructionTime;
 		GET_REAL_CPU_TICKS(instructionTime)
 
@@ -5956,7 +5956,7 @@ op_escape(struct z80_set *rec)
 
 		realCpuTicks instructionTimeEnd;
 		GET_REAL_CPU_TICKS(instructionTimeEnd)
-		profilerData[opcodeInstruct].instruction_time_counter += instructionTimeEnd - instructionTime;
+		profilerData[opcodeInstructHolder].instruction_time_counter += instructionTimeEnd - instructionTime;
 		timer_divider_update();
 
 	#else

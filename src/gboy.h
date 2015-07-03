@@ -243,7 +243,7 @@ typedef Uint64 realCpuTicks;
      CPUToalTicks = ( ((realCpuTicks)lo) | ( ((realCpuTicks)hi ) << 32) ); \
 }
 
-int opcodeInstruct;
+Uint16 opcodeInstruct;
 
 struct profilerInfo {
 	realCpuTicks instruction_counter;
