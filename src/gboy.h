@@ -226,8 +226,8 @@ extern long addr_sp_ptrs[16];
 //The new code
 
 //Should this go to globals?
-extern gb_addr_global_var;
-extern mbc_num_global_var;
+extern Uint16 gb_addr_global_var;
+extern int mbc_num_global_var;
 
 
 

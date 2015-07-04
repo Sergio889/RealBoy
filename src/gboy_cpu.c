@@ -108,8 +108,6 @@ op_ld_imm_mem(struct z80_set *rec)
 void
 op_ld_hl_sp(struct z80_set *rec)
 {
-	Uint16 *ptr_sp;
-
 	regs_sets.regs[PC].UWord++;
 	cpu_state.pc++;
 	regs_sets.regs[SP].UWord = regs_sets.regs[HL].UWord;
@@ -2763,7 +2761,7 @@ op_jmp_ind(struct z80_set *rec)
 {
 	Uint16 *dest;
 
-	dest = (Uint16 *)cpu_state.pc;
+//	dest = (Uint16 *)cpu_state.pc;
 	cpu_state.pc = (Uint8 *)(addr_sp_ptrs[regs_sets.regs[HL].UWord>>12]+regs_sets.regs[HL].UWord);
 	regs_sets.regs[PC].UWord = regs_sets.regs[HL].UWord;
 }
@@ -5424,11 +5422,11 @@ void
 execute_precise_with_profiler(struct z80_set *rec)
 {
 	Sint8 ticks;
-	Uint8 div_tmp;
+//	Uint8 div_tmp;
 
 	cpu_state.write_is_delayed = 0;
 	ticks = (rec->format[7]>>2)-1;
-	div_tmp = cpu_state.div_ctrl;
+//	div_tmp = cpu_state.div_ctrl;
 	
 	while (1)
 	{
@@ -5508,11 +5506,11 @@ void
 execute_precise(struct z80_set *rec)
 {
 	Sint8 ticks;
-	Uint8 div_tmp;
+//	Uint8 div_tmp;
 
 	cpu_state.write_is_delayed = 0;
 	ticks = (rec->format[7]>>2)-1;
-	div_tmp = cpu_state.div_ctrl;
+//	div_tmp = cpu_state.div_ctrl;
 
 	while (1)
 	{
@@ -5791,8 +5789,6 @@ void
 exec_next_with_profiler(int offset)
 {
 	static struct z80_set *rec;
-
-	printf("OFFSET:%d\n", offset);
 	cpu_state.pc = addr_sp+offset;
 
 	while (!chg_gam) {
@@ -5891,10 +5887,14 @@ void
 rom_exec(int offset)
 {
 	memset(&cpu_state, 0, sizeof(struct cpu_state));
+
+	//This funct pointer is used to prevent a if/else in op_escape
+	execute_precise_func_ptr = &execute_precise;
 	if (gbddb == 1)
 		exec_next_with_dbg(offset);
 	else if (profiler == 1){
 		memset(&profilerData, 0, sizeof(struct profilerInfo) * NUMBER_OF_INSTRUCTIONS);
+		execute_precise_func_ptr = &execute_precise_with_profiler;
 		exec_next_with_profiler(offset);
 	}
 	else
@@ -5913,18 +5913,15 @@ op_escape(struct z80_set *rec)
 	cpu_state.pc++;
 	regs_sets.regs[PC].UWord++;
 
-	//cpu_state.inst_is_cb = 1;
 	//This should be the dispacher responsability!!! but... performance reasons
-
 	rec = z80_ldex + 256 + *cpu_state.pc;
 	cpu_state.cur_tcks = rec->format[7];
-
 	if (rec->format[5] & DELAY){//Check if flag delay is activated
-		execute_precise(rec);
-	}else{
 
+		(*execute_precise_func_ptr)(rec);
+
+	}else{
 		if(profiler){//TODO:The must be a better way!!! but will leave it for now
-					//note: maybe with a fuction pointer!
 					//it is not a major overhead (op_escape is called very few times)
 			Uint16 opcodeInstructHolder = *cpu_state.pc + 256;
 			profilerData[opcodeInstructHolder].instruction_counter++;
@@ -5936,12 +5933,11 @@ op_escape(struct z80_set *rec)
 			realCpuTicks instructionTimeEnd;
 			GET_REAL_CPU_TICKS(instructionTimeEnd)
 			profilerData[opcodeInstructHolder].instruction_time_counter += instructionTimeEnd - instructionTime;
-			timer_divider_update();
 
 		}else{
 			rec->func(rec);//Execute instruction
-			timer_divider_update();
 		}
+			timer_divider_update();
 	}
 }
 

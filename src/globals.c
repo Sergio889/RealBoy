@@ -35,4 +35,5 @@ long addr_sp_ptrs_predecoded[16] = { 0 };
 
 Uint16 gb_addr_global_var;
 int mbc_num_global_var;
+void (*execute_precise_func_ptr)(struct z80_set *rec);
 

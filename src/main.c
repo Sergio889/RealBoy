@@ -38,10 +38,10 @@ Options:\n\
   -h, --help\t\t\tPrint this help\n\
   -d, --debug\t\t\tEnable GDDB debugger\n\
   -v, --version\t\t\tPrint current version and exit\n\
+  -p, --profiler\t\tEnable function call profiler\n\
   -D, --DMG\t\t\tForce Game Boy Mode\n\
   -C, --CGB\t\t\tForce Color Game Boy Mode\n\
   -S, --SGB\t\t\tForce Super Game Boy Mode\n\
-  -P, --Profiler\t\tEnable function call profiler\n\
 ");
 }
 
@@ -61,7 +61,7 @@ main(int argc, char *argv[])
 	/* Parse arguments. */
 	int op;
 	do {
-		op = getopt_long(argc, argv, "r:1234fhdbvDCSP", options, NULL);
+		op = getopt_long(argc, argv, "r:1234fhdbvpDCS", options, NULL);
 		int arg;
 		switch (op) {
 			/* Video */
@@ -124,7 +124,7 @@ main(int argc, char *argv[])
 				gboy_hw=SGB;
 				break;
 			/* Enable profiler */
-			case 'P':
+			case 'p':
 				profiler=1;
 				break;
 			default:
