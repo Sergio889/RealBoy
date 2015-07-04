@@ -17,7 +17,6 @@
  */
 /* Misc */
 #define NULLZ 0
-
 /* Offsets to registers in address space */
 #define DIV_REG 0xff04 // DIV
 #define TIMA_REG 0xff05 // TIMA
@@ -137,3 +136,6 @@ struct regs_sets {
 		Sint16 SWord;
 	} regs[10];
 } regs_sets;
+
+
+void op_escape(struct z80_set *rec);

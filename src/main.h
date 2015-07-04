@@ -31,6 +31,7 @@ extern void set_fps(int);
 extern void ignore_conf(long);
 extern void vid_toggle_fullscreen();
 extern void init_conf();
+extern int profiler;
 
 
 /* Locally-global variables*/

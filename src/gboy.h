@@ -226,51 +226,8 @@ extern long addr_sp_ptrs[16];
 //The new code
 
 //Should this go to globals?
-Uint16 gb_addr_global_var;
-int mbc_num_global_var;
-
-/* Awesome Profiler */
-#ifdef PROFILER
-
-#define NUMBER_OF_INSTRUCTIONS 512
-
-typedef Uint64 realCpuTicks;
-
-//note: it is created a new scope ( { } ), because of the temporary values lo and hi
-#define GET_REAL_CPU_TICKS(CPUToalTicks) { \
-     Uint32 lo, hi; \
-     asm volatile("cpuid \n\t rdtsc" : "=a" (lo), "=d" (hi)); \
-     CPUToalTicks = ( ((realCpuTicks)lo) | ( ((realCpuTicks)hi ) << 32) ); \
-}
-
-Uint16 opcodeInstruct;
-
-struct profilerInfo {
-	realCpuTicks instruction_counter;
-	realCpuTicks instruction_time_counter;
-} profilerInfo;
-
-
-
-struct profilerInfo profilerData[NUMBER_OF_INSTRUCTIONS];
-#endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+extern gb_addr_global_var;
+extern mbc_num_global_var;
 
 
 

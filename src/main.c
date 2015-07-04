@@ -18,13 +18,8 @@
 
 #include "gboy.h"
 #include "main.h"
+#include "gboy_profiler.h"
 
-#ifdef PROFILER
-#include <time.h>
-#include "gboy_cpu.h"
-extern struct z80_set z80_ldex[];
-extern Uint32 instruction_counter[];
-#endif
 
 static void
 usage(char *cmd)
@@ -46,6 +41,7 @@ Options:\n\
   -D, --DMG\t\t\tForce Game Boy Mode\n\
   -C, --CGB\t\t\tForce Color Game Boy Mode\n\
   -S, --SGB\t\t\tForce Super Game Boy Mode\n\
+  -P, --Profiler\t\tEnable function call profiler\n\
 ");
 }
 
@@ -55,10 +51,6 @@ Options:\n\
 int
 main(int argc, char *argv[])
 {
-#ifdef PROFILER
-	clock_t t;
-	t = clock();
-#endif
 
 	/* If no arguments, print usage and exit. */
 	if (argc==1) {
@@ -69,7 +61,7 @@ main(int argc, char *argv[])
 	/* Parse arguments. */
 	int op;
 	do {
-		op = getopt_long(argc, argv, "r:1234fhdbvDCS", options, NULL);
+		op = getopt_long(argc, argv, "r:1234fhdbvDCSP", options, NULL);
 		int arg;
 		switch (op) {
 			/* Video */
@@ -131,6 +123,10 @@ main(int argc, char *argv[])
 				ignore_conf(GB_MODE);
 				gboy_hw=SGB;
 				break;
+			/* Enable profiler */
+			case 'P':
+				profiler=1;
+				break;
 			default:
 				break;
 
@@ -143,6 +139,7 @@ main(int argc, char *argv[])
 		else
 			file_path = strndup(argv[optind], 256);
 	}
+
 
 	if (rom_file != NULL)	{
 		init_conf();
@@ -158,75 +155,8 @@ main(int argc, char *argv[])
 	else
 		usage(argv[0]);
 
-#ifdef PROFILER
-	t = clock() - t;
-	unsigned long long total_instructions = 0, total_time = 0;
-
-	change_cur_dir("/tmp");
-	FILE* pgdataFile = fopen("profiler.general_data", "w");
-	FILE* prdataFile = fopen("profiler.run_data", "a");
-
-	printf("%s", "===================  Awesome profiler stats  ===================\n");
-	fprintf(pgdataFile, "%s", "===================  Awesome profiler stats  ===================\n");
-	fprintf(prdataFile, "%s", "===================  Awesome profiler stats  ===================\n");
-	printf("%s", "Opcode - Instruction - DELAY - RD_XOR_WR - RD_WR - Ext - N_Instructions - CPU_Ticks - AVG_time\n");
-	fprintf(pgdataFile, "%s", "Opcode?Opcode(0x)?Instruction?DELAY?RD_XOR_WR?RD_WR?Ext\n");
-	fprintf(prdataFile, "%s", "Opcode?Usage?Time (ml)\n");
-
-	Uint16 opcode;
-	for (opcode  = 0; opcode < NUMBER_OF_INSTRUCTIONS; opcode++) {
-		printf("0x%-4x, %-15s, %s, %s, %s, %s, %10llu, %10llu, ",
-				opcode, z80_ldex[opcode].name,
-				(z80_ldex[opcode].format[5] & DELAY) ? "Y" : "N",
-				(z80_ldex[opcode].format[5] & RD_XOR_WR) ? "Y" : "N",
-				(z80_ldex[opcode].format[5] & RD_WR) ? "Y" : "N",
-				(opcode > 0xFF) ? "Y" : "N",
-				profilerData[opcode].instruction_counter,
-				profilerData[opcode].instruction_time_counter);
-
-		if(profilerData[opcode].instruction_counter != 0)
-			printf("AVG:%10llu\n", profilerData[opcode].instruction_time_counter / 
-					profilerData[opcode].instruction_counter);
-		else
-			printf("AVG:%10llu\n", profilerData[opcode].instruction_time_counter);
-
-		fprintf(pgdataFile, "%d?0x%x?%s?%s?%s?%s?%s\n",
-						opcode, opcode, z80_ldex[opcode].name,
-						(z80_ldex[opcode].format[5] & DELAY) ? "Y" : "N",
-						(z80_ldex[opcode].format[5] & RD_XOR_WR) ? "Y" : "N",
-						(z80_ldex[opcode].format[5] & RD_WR) ? "Y" : "N",
-						(opcode > 0xFF) ? "Y" : "N");
-
-		fprintf(prdataFile, "%d?%llu?%llu?",
-						opcode,
-						profilerData[opcode].instruction_counter,
-						profilerData[opcode].instruction_time_counter);
-
-		if(profilerData[opcode].instruction_counter != 0)
-			fprintf(prdataFile, "%llu\n", profilerData[opcode].instruction_time_counter / 
-					profilerData[opcode].instruction_counter);
-		else
-			fprintf(prdataFile, "%llu\n", profilerData[opcode].instruction_time_counter);
-
-		total_instructions += profilerData[opcode].instruction_counter;
-		total_time += profilerData[opcode].instruction_time_counter;
-	}
-
-	printf("%s", "======================\n");
-	fprintf(prdataFile, "%s", "======================\n");
-	printf("Total GameBoy instructions: %llu\n", total_instructions);
-	fprintf(prdataFile, "Total GameBoy instructions: %llu\n", total_instructions);
-	printf("%s", "Time, it needs time (to win back your love again)\n");
-	fprintf(prdataFile, "%s", "Time, it needs time (to win back your love again)\n");
-	printf ("%d clicks (%f seconds).\n",(int)t,((float)t)/CLOCKS_PER_SEC);
-	fprintf (prdataFile, "%d clicks (%f seconds).\n",(int)t,((float)t)/CLOCKS_PER_SEC);
-
-	printf ("%s", "\n\nFiles with data in /tmp/profiler.general_data (general instructions data)");
-	printf (" and /tmp/profiler.run_data (data for this run).\n");
-
-	fclose(pgdataFile);
-	fclose(prdataFile);
-#endif
+	if(profiler)
+		outputProfilerData();
 
 	return 0;
 }

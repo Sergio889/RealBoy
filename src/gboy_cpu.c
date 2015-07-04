@@ -18,9 +18,12 @@
 
 #include "gboy.h"
 #include "gboy_cpu.h"
+#include "gboy_profiler.h"
 
-void op_escape(struct z80_set *rec);
 
+unsigned short opcodeInstruct;
+extern struct profilerInfo profilerData[512];
+extern int profiler;
 /* 
  * Group 1: Load
  */
@@ -5416,10 +5419,9 @@ struct z80_set z80_ldex[512] =
 	op_set
 };
 
-#ifdef PROFILER
 
 void
-execute_precise(struct z80_set *rec)
+execute_precise_with_profiler(struct z80_set *rec)
 {
 	Sint8 ticks;
 	Uint8 div_tmp;
@@ -5502,8 +5504,6 @@ end_execute_precise:
 	return;
 }
 
-#else
-
 void
 execute_precise(struct z80_set *rec)
 {
@@ -5570,7 +5570,7 @@ last_run:
 end_execute_precise:
 	return;
 }
-#endif
+
 
 void
 timer_divider_update()
@@ -5787,10 +5787,8 @@ proc_ints()
 }
 
 
-#ifdef PROFILER
-
 void
-exec_next(int offset)
+exec_next_with_profiler(int offset)
 {
 	static struct z80_set *rec;
 
@@ -5806,7 +5804,7 @@ exec_next(int offset)
 		cpu_state.cur_tcks = rec->format[7];
 
 		if (rec->format[5] & DELAY) {
-			execute_precise(rec);
+			execute_precise_with_profiler(rec);
 		}else{
 			profilerData[opcodeInstruct].instruction_counter++;
 			realCpuTicks instructionTime;
@@ -5830,38 +5828,6 @@ exec_next(int offset)
 	chg_gam = 0;
 }
 
-//No debug while profiling (for now)
-exec_next_with_dbg(int offset) { exec_next(offset); }
-#else
-
-
-void
-exec_next(int offset)
-{
-	static struct z80_set *rec;
-
-	cpu_state.pc = addr_sp + offset;
-
-	while (!chg_gam) {
-
-		rec = z80_ldex + *cpu_state.pc;
-		cpu_state.cur_tcks = rec->format[7];
-
-		if (rec->format[5] & DELAY) {
-			execute_precise(rec);
-		}else{
-			rec->func(rec);//Execute instruction
-			timer_divider_update();
-		}
-
-		cpu_state.pc = (Uint8 *) ( regs_sets.regs[PC].UWord + addr_sp_ptrs[( regs_sets.regs[PC].UWord ) >> 12] );
-		proc_ints();//check interrupts
-		if (addr_sp[LCDC_REG]&0x80)//LCD refresh bit is set
-			lcd_refrsh();
-	}
-	chg_gam = 0;
-
-}
 
 void
 exec_next_with_dbg(int offset)
@@ -5875,12 +5841,12 @@ exec_next_with_dbg(int offset)
 		rec = z80_ldex + *cpu_state.pc;
 		cpu_state.cur_tcks = rec->format[7];
 
-		gddb_main(0, cpu_state.pc, (Uint8 *)rec);
+		gddb_main(0, cpu_state.pc, (Uint8 *)rec); //the only diference!!!
 
 		if (rec->format[5] & DELAY) {
 			execute_precise(rec);
 		}else{
-			rec->func(rec);//Execute instruction
+			rec->func(rec);
 			timer_divider_update();
 		}
 
@@ -5891,39 +5857,50 @@ exec_next_with_dbg(int offset)
 	}
 	chg_gam = 0;
 }
-#endif
 
+void
+exec_next(int offset)
+{
+	static struct z80_set *rec;
 
+	cpu_state.pc = addr_sp + offset;
+
+	while (!chg_gam) {
+		rec = z80_ldex + *cpu_state.pc;
+		cpu_state.cur_tcks = rec->format[7];
+
+		if (rec->format[5] & DELAY) {
+			execute_precise(rec);
+		}else{
+			rec->func(rec);
+			timer_divider_update();
+		}
+
+		cpu_state.pc = (Uint8 *) ( regs_sets.regs[PC].UWord + addr_sp_ptrs[( regs_sets.regs[PC].UWord ) >> 12] );
+		proc_ints();//check interrupts
+		if (addr_sp[LCDC_REG]&0x80)//LCD refresh bit is set
+			lcd_refrsh();
+	}
+	chg_gam = 0;
+}
 
 /*
  * Prepare to execute
  */
-#ifdef PROFILER
-
 void
 rom_exec(int offset)
 {
 	memset(&cpu_state, 0, sizeof(struct cpu_state));
-	memset(&profilerData, 0, sizeof(profilerInfo) * NUMBER_OF_INSTRUCTIONS);
-	if (gbddb==1)
+	if (gbddb == 1)
 		exec_next_with_dbg(offset);
+	else if (profiler == 1){
+		memset(&profilerData, 0, sizeof(struct profilerInfo) * NUMBER_OF_INSTRUCTIONS);
+		exec_next_with_profiler(offset);
+	}
 	else
 		exec_next(offset);
 }
 
-
-#else
-
-void
-rom_exec(int offset)
-{
-	memset(&cpu_state, 0, sizeof(struct cpu_state));
-	if (gbddb==1)
-		exec_next_with_dbg(offset);
-	else
-		exec_next(offset);
-}
-#endif
 
 
 /*
@@ -5946,23 +5923,25 @@ op_escape(struct z80_set *rec)
 		execute_precise(rec);
 	}else{
 
-	#ifdef PROFILER
-		Uint16 opcodeInstructHolder = *cpu_state.pc + 256;
-		profilerData[opcodeInstructHolder].instruction_counter++;
-		realCpuTicks instructionTime;
-		GET_REAL_CPU_TICKS(instructionTime)
+		if(profiler){//TODO:The must be a better way!!! but will leave it for now
+					//note: maybe with a fuction pointer!
+					//it is not a major overhead (op_escape is called very few times)
+			Uint16 opcodeInstructHolder = *cpu_state.pc + 256;
+			profilerData[opcodeInstructHolder].instruction_counter++;
+			realCpuTicks instructionTime;
+			GET_REAL_CPU_TICKS(instructionTime)
 
-		rec->func(rec);//Execute instruction
+			rec->func(rec);//Execute instruction
 
-		realCpuTicks instructionTimeEnd;
-		GET_REAL_CPU_TICKS(instructionTimeEnd)
-		profilerData[opcodeInstructHolder].instruction_time_counter += instructionTimeEnd - instructionTime;
-		timer_divider_update();
+			realCpuTicks instructionTimeEnd;
+			GET_REAL_CPU_TICKS(instructionTimeEnd)
+			profilerData[opcodeInstructHolder].instruction_time_counter += instructionTimeEnd - instructionTime;
+			timer_divider_update();
 
-	#else
-		rec->func(rec);//Execute instruction
-		timer_divider_update();
-	#endif
+		}else{
+			rec->func(rec);//Execute instruction
+			timer_divider_update();
+		}
 	}
 }
 

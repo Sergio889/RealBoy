@@ -31,3 +31,8 @@ long chg_gam=0;
 long addr_sp_ptrs[16] = { 0 };
 //new
 long addr_sp_ptrs_predecoded[16] = { 0 };
+
+
+Uint16 gb_addr_global_var;
+int mbc_num_global_var;
+
