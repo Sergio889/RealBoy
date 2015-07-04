@@ -88,3 +88,6 @@ void outputProfilerData(){
 	fclose(pgdataFile);
 	fclose(prdataFile);
 }
+
+
+

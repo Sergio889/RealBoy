@@ -140,3 +140,4 @@ struct regs_sets {
 
 void op_escape(struct z80_set *rec);
 extern void (*execute_precise_func_ptr)(struct z80_set *rec);
+//void (*execute_precise_func_ptr)(struct z80_set *rec); TODO:POINTER ADDRESS IS NOT STABLE!!!

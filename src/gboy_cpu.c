@@ -5934,10 +5934,9 @@ op_escape(struct z80_set *rec)
 			GET_REAL_CPU_TICKS(instructionTimeEnd)
 			profilerData[opcodeInstructHolder].instruction_time_counter += instructionTimeEnd - instructionTime;
 
-		}else{
+		}else
 			rec->func(rec);//Execute instruction
-		}
-			timer_divider_update();
+		timer_divider_update();
 	}
 }
 
