@@ -28,12 +28,9 @@ char *home_path=NULL;
 char *file_path=NULL;
 Uint8 addr_sp[0x10000];
 long chg_gam=0;
-long addr_sp_ptrs[16] = { 0 };
+unsigned long addr_sp_ptrs[16] = { 0 };
 //new
-long addr_sp_ptrs_predecoded[16] = { 0 };
 
 
 Uint16 gb_addr_global_var;
 int mbc_num_global_var;
-void (*execute_precise_func_ptr)(struct z80_set *rec);
-

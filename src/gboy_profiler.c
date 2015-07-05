@@ -91,3 +91,39 @@ void outputProfilerData(){
 
 
 
+
+
+long addr_sp_ptrs_predecoded[8] = { 0 }; // 0x0000 - 0x7FFF
+struct predecode_mold{
+	void (* operation_adress) (struct z80_set *rec);
+	Uint8 uint8;
+};
+struct predecode_mold *predecoded_instructions;
+
+
+void bootstrap_func(struct z80_set *rec){
+	rec->func(rec);
+}
+
+void init_predecode_structure(){
+
+	/* Allocate space for predecoded */
+	Uint32 predecoded_mem_size= (0x8000<<gb_cart.cart_rom_size);
+	predecoded_instructions = malloc( predecoded_mem_size * sizeof(struct predecode_mold));
+
+	/* initialize predecoded code to bootstrap function */
+	int i;
+	for (i=0; i < predecoded_mem_size; i++){
+		predecoded_instructions[i].operation_adress = &bootstrap_func;
+	}
+	printf("SIZE:%u\n", sizeof(struct predecode_mold));
+	printf("%u\n", predecoded_mem_size);
+
+}
+
+
+
+
+
+
+

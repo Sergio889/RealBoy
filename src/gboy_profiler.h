@@ -28,10 +28,13 @@
 
 typedef unsigned long long realCpuTicks;
 
+
 struct profilerInfo {
 	realCpuTicks instruction_counter;
 	realCpuTicks instruction_time_counter;
 };
+
+
 
 
 

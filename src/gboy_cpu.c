@@ -24,6 +24,7 @@
 unsigned short opcodeInstruct;
 extern struct profilerInfo profilerData[512];
 extern int profiler;
+void (*execute_precise_func_ptr)(struct z80_set *rec);
 /* 
  * Group 1: Load
  */
@@ -272,6 +273,7 @@ void
 op_ldi_mem_reg(struct z80_set *rec)
 {
 	Uint16 gb_addr = regs_sets.regs[HL].UWord;
+	printf("%d - %d - %lu\n", gb_addr, gb_addr>>12, addr_sp_ptrs[gb_addr>>12]);
 	Uint8 *host_addr = (Uint8 *)(addr_sp_ptrs[gb_addr>>12]+gb_addr);
 
 	Uint8 val; 
